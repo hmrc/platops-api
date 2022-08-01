@@ -1,7 +1,7 @@
 
 # platops-api
 
-This is a placeholder README.md for a new repository
+This service is the only officially supported api of the platops infrastructure.
 
 ### License
 
