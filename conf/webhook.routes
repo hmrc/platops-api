@@ -1,0 +1,3 @@
+# microservice specific routes
+
+POST        /leak-detection             uk.gov.hmrc.platopsapi.controllers.WebhooksController.leakDetection()
