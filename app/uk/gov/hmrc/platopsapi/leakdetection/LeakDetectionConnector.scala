@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.platopsapi.connectors
+package uk.gov.hmrc.platopsapi.leakdetection
 
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.client.HttpClientV2
@@ -25,15 +25,15 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class PrCommenterConnector @Inject()(
-                                      httpClientV2: HttpClientV2,
-                                      servicesConfig: ServicesConfig
-                                    )(implicit val ec: ExecutionContext) {
+class LeakDetectionConnector @Inject()(
+                                        httpClientV2: HttpClientV2,
+                                        servicesConfig: ServicesConfig
+                                      )(implicit val ec: ExecutionContext) {
 
-  lazy private val baseUrl = servicesConfig.baseUrl("pr-commenter")
+  lazy private val baseUrl = servicesConfig.baseUrl("leak-detection")
 
   def webhook(body: JsValue)(implicit hc: HeaderCarrier): Future[JsValue] = {
-    val req = httpClientV2.post(url"${baseUrl}/pr-commenter/webhook")
+    val req = httpClientV2.post(url"${baseUrl}/leak-detection/validate")
       .withBody(body)
 
     hc.otherHeaders.filter(_._1 == "X-Hub-Signature-256").headOption match {

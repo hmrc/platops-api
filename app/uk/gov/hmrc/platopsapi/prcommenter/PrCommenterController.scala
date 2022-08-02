@@ -14,33 +14,24 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.platopsapi.controllers
+package uk.gov.hmrc.platopsapi.prcommenter
 
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, ControllerComponents}
-import uk.gov.hmrc.platopsapi.connectors.{LeakDetectionConnector, PrCommenterConnector, Request}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton()
-class WebhooksController @Inject()(leakDetectionConnector: LeakDetectionConnector,
-                                   prCommenterConnector: PrCommenterConnector,
-                                   cc: ControllerComponents)
-                                  (implicit ec: ExecutionContext)
+class PrCommenterController @Inject()(prCommenterConnector: PrCommenterConnector,
+                                      cc: ControllerComponents)
+                                     (implicit ec: ExecutionContext)
   extends BackendController(cc) {
 
-  def leakDetection(): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    leakDetectionConnector
-      .webhook(request.body)
-      .map(Ok(_))
-  }
-
-  def prCommenter(): Action[JsValue] = Action.async(parse.json) { implicit request =>
+  def webhook(): Action[JsValue] = Action.async(parse.json) { implicit request =>
     prCommenterConnector
       .webhook(request.body)
       .map(Ok(_))
   }
-
 }

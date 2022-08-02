@@ -1,4 +1,4 @@
-package uk.gov.hmrc.platopsapi.connectors
+package uk.gov.hmrc.platopsapi.leakdetection
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
