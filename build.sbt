@@ -3,13 +3,14 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
 val appName = "platops-api"
 
-val silencerVersion = "1.7.7"
+val silencerVersion = "1.7.8"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .settings(
     majorVersion                     := 0,
-    scalaVersion                     := "2.12.15",
+    scalaVersion                     := "2.13.8",
+    PlayKeys.playDefaultPort         := 8860,
     libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
     // ***************
     // Use the silencer plugin to suppress warnings

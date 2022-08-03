@@ -1,5 +1,6 @@
 # Add all the application routes to the app.routes file
-->         /platops-api              app.Routes
+->         /api                       app.Routes
+->         /webhooks                  webhook.Routes
 ->         /                          health.Routes
 
 GET        /admin/metrics             com.kenshoo.play.metrics.MetricsController.metrics

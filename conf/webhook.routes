@@ -1,0 +1,4 @@
+# microservice specific routes
+
+POST        /leak-detection             uk.gov.hmrc.platopsapi.leakdetection.LeakDetectionController.webhook()
+POST        /pr-commenter               uk.gov.hmrc.platopsapi.prcommenter.PrCommenterController.webhook()
