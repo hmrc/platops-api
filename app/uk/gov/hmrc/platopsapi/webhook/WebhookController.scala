@@ -17,13 +17,14 @@
 package uk.gov.hmrc.platopsapi.webhook
 
 import play.api.libs.json.JsValue
-import play.api.mvc.{Action, ControllerComponents}
-import uk.gov.hmrc.http.StringContextOps
+import play.api.mvc.{Action, ControllerComponents, Request, Result}
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.net.URL
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future
 
 @Singleton()
 class WebhookController @Inject()(githubWebhookProxy: GithubWebhookProxy,
@@ -35,12 +36,16 @@ class WebhookController @Inject()(githubWebhookProxy: GithubWebhookProxy,
   lazy private val prCommenterUrl: URL = url"${servicesConfig.baseUrl("pr-commenter")}/pr-commenter/webhook"
 
   def leakDetection(): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    githubWebhookProxy
-      .webhook(leakDetectionUrl, request.body)
+    proxyRequestTo(leakDetectionUrl, request)
   }
 
   def prCommenter(): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    githubWebhookProxy
-      .webhook(prCommenterUrl, request.body)
+    proxyRequestTo(prCommenterUrl, request)
   }
+
+  private def proxyRequestTo(url: URL, request: Request[JsValue])(implicit hc: HeaderCarrier): Future[Result] = {
+    githubWebhookProxy
+      .webhook(url, request.body)
+  }
+
 }
