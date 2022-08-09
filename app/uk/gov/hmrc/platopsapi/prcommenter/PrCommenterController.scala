@@ -18,20 +18,26 @@ package uk.gov.hmrc.platopsapi.prcommenter
 
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, ControllerComponents}
+import uk.gov.hmrc.http.StringContextOps
+import uk.gov.hmrc.platopsapi.webhook.GithubWebhookProxy
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import java.net.URL
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton()
-class PrCommenterController @Inject()(prCommenterConnector: PrCommenterConnector,
+class PrCommenterController @Inject()(githubWebhookProxy: GithubWebhookProxy,
+                                      servicesConfig: ServicesConfig,
                                       cc: ControllerComponents)
                                      (implicit ec: ExecutionContext)
   extends BackendController(cc) {
 
+  lazy private val webhookUrl: URL = url"${servicesConfig.baseUrl("pr-commenter")}/pr-commenter/webhook"
+
   def webhook(): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    prCommenterConnector
-      .webhook(request.body)
-      .map(Ok(_))
+    githubWebhookProxy
+      .webhook(webhookUrl, request.body)
   }
 }
