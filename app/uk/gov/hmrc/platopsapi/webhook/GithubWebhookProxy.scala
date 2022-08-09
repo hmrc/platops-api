@@ -27,6 +27,8 @@ import java.net.URL
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
+
 @Singleton
 class GithubWebhookProxy @Inject()(httpClientV2: HttpClientV2)(implicit val ec: ExecutionContext) {
 
