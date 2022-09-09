@@ -14,34 +14,34 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.platopsapi.webhook
+package uk.gov.hmrc.platopsapi.api
 
-import play.api.libs.json.JsValue
+import play.api.libs.ws.BodyWritable
 import play.api.mvc.Result
 
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
-import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.platopsapi.ConnectorUtil
 
 import java.net.URL
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.reflect.runtime.universe.TypeTag
 
 @Singleton
-class GithubWebhookProxy @Inject()(httpClientV2: HttpClientV2)(implicit val ec: ExecutionContext) {
+class ApiConnector @Inject()(httpClientV2: HttpClientV2)(implicit val ec: ExecutionContext) {
   import HttpReads.Implicits.readRaw
 
-  def webhook(url: URL, body: JsValue)(implicit hc: HeaderCarrier): Future[Result] =
-    webhookRequestWithSignatureHeader(url)
-      .withBody(body)
+  def get(url: URL)(implicit hc: HeaderCarrier): Future[Result] =
+    httpClientV2
+      .get(url)
       .execute
       .map(ConnectorUtil.toResult)
 
-  private def webhookRequestWithSignatureHeader(url: URL)(implicit hc: HeaderCarrier): RequestBuilder = {
-    val req = httpClientV2.post(url)
-    hc.otherHeaders.filter(_._1 == "X-Hub-Signature-256").headOption match {
-      case Some(h) => req.setHeader(h)
-      case _ => req
-    }
-  }
+  def post[B : BodyWritable: TypeTag](url: URL, body: B)(implicit hc: HeaderCarrier): Future[Result] =
+    httpClientV2
+      .post(url)
+      .withBody(body)
+      .execute
+      .map(ConnectorUtil.toResult)
 }
