@@ -1,6 +1,7 @@
 # Add all the application routes to the app.routes file
 ->         /api                       app.Routes
-->         /webhooks                  webhook.Routes
+->         /webhooks                  labsWebhook.Routes
+->         /                          liveWebhook.Routes
 ->         /                          health.Routes
 
 GET        /admin/metrics             com.kenshoo.play.metrics.MetricsController.metrics
