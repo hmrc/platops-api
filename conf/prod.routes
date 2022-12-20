@@ -4,4 +4,5 @@
 ->         /                          liveWebhook.Routes
 ->         /                          health.Routes
 
+POST       /webhook                   uk.gov.hmrc.platopsapi.webhook.WebhookController.processGithubWebhook()
 GET        /admin/metrics             com.kenshoo.play.metrics.MetricsController.metrics

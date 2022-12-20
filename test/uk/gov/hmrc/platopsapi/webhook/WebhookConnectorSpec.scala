@@ -20,20 +20,20 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.libs.json.Json
+
 import uk.gov.hmrc.http.test.{HttpClientV2Support, WireMockSupport}
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class GithubWebhookProxySpec extends AnyWordSpec
+class WebhookConnectorSpec extends AnyWordSpec
   with Matchers
   with ScalaFutures
   with IntegrationPatience
   with WireMockSupport
   with HttpClientV2Support {
 
-  "GithubWebhookProxy" should {
+  "WebhookConnectorSpec" should {
 
     def stubbedResponse() = stubFor(
       post(urlEqualTo("/webhook"))
@@ -43,13 +43,13 @@ class GithubWebhookProxySpec extends AnyWordSpec
         )
     )
 
-    val onTest = new GithubWebhookProxy(httpClientV2)
+    val onTest = new WebhookConnector(httpClientV2)
 
     "pass provided body and github signature header to webhook request" in {
       stubbedResponse()
 
       val hc = new HeaderCarrier(otherHeaders = Seq(("X-Hub-Signature-256", "aaa111")))
-      onTest.webhook(url"${wireMockUrl}/webhook", Json.parse("""{"some": "value"}"""))(hc).futureValue
+      onTest.webhook(url"${wireMockUrl}/webhook", """{"some": "value"}""")(hc).futureValue
 
       verify(
         postRequestedFor(urlEqualTo("/webhook"))
@@ -62,7 +62,7 @@ class GithubWebhookProxySpec extends AnyWordSpec
       stubbedResponse()
 
       val hc = new HeaderCarrier()
-      onTest.webhook(url"${wireMockUrl}/webhook", Json.parse("""{"some": "value"}"""))(hc).futureValue
+      onTest.webhook(url"${wireMockUrl}/webhook", """{"some": "value"}""")(hc).futureValue
 
       verify(
         postRequestedFor(urlEqualTo("/webhook"))
