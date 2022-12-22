@@ -65,6 +65,30 @@ class GithubRequestSpec extends AnyWordSpec with Matchers {
         )
     }
 
+    "parse Delete" in {
+      Json
+        .parse(loadResource("/delete.json"))
+        .as[GithubRequest](GithubRequest.reads) shouldBe (
+          GithubRequest.Delete(
+            repoName      = "Hello-World",
+            authorName    = "SomeUser",
+            branchRef     = "master",
+            repositoryUrl = "https://github.com/Codertocat/Hello-World"
+          )
+        )
+    }
+
+    "parse Repository" in {
+      Json
+        .parse(loadResource("/repository.json"))
+        .as[GithubRequest](GithubRequest.reads) shouldBe (
+          GithubRequest.Repository(
+            repoName = "Hello-World",
+            action   = "created"
+          )
+        )
+    }
+
     "parse Ping" in {
       Json
         .parse(loadResource("/ping.json"))

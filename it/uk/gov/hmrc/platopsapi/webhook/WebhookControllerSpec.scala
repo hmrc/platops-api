@@ -113,5 +113,51 @@ class WebhookControllerSpec extends AnyWordSpec
           .withHeader("X-Hub-Signature-256", equalTo(ghSignature))
           .withRequestBody(equalToJson(payload)))
     }
+
+    "process a delete" in {
+      val payload     = slurp("it/resources/delete.json")
+      val ghSignature = "sha256=" + new HmacUtils(HmacAlgorithms.HMAC_SHA_256, webhookSecretKey).hmacHex(payload)
+
+      stubFor(
+        post(urlEqualTo("/leak-detection/validate"))
+          .withHeader("X-Hub-Signature-256", equalTo(ghSignature))
+          .willReturn(aResponse().withStatus(200)))
+
+      val result = controller.processGithubWebhook()(
+        FakeRequest("POST", "/webhook")
+          .withHeaders("X-Hub-Signature-256" -> ghSignature)
+          .withBody(payload)
+      )
+      Helpers.status(result)        shouldBe Helpers.OK
+      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Delete request processed")
+
+      verify(
+        postRequestedFor(urlEqualTo("/leak-detection/validate"))
+          .withHeader("X-Hub-Signature-256", equalTo(ghSignature))
+          .withRequestBody(equalToJson(payload)))
+    }
+
+    "process a repository" in {
+      val payload     = slurp("it/resources/repository.json")
+      val ghSignature = "sha256=" + new HmacUtils(HmacAlgorithms.HMAC_SHA_256, webhookSecretKey).hmacHex(payload)
+
+      stubFor(
+        post(urlEqualTo("/leak-detection/validate"))
+          .withHeader("X-Hub-Signature-256", equalTo(ghSignature))
+          .willReturn(aResponse().withStatus(200)))
+
+      val result = controller.processGithubWebhook()(
+        FakeRequest("POST", "/webhook")
+          .withHeaders("X-Hub-Signature-256" -> ghSignature)
+          .withBody(payload)
+      )
+      Helpers.status(result)        shouldBe Helpers.OK
+      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Repository request processed")
+
+      verify(
+        postRequestedFor(urlEqualTo("/leak-detection/validate"))
+          .withHeader("X-Hub-Signature-256", equalTo(ghSignature))
+          .withRequestBody(equalToJson(payload)))
+    }
   }
 }

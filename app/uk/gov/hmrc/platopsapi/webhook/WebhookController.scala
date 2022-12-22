@@ -86,6 +86,22 @@ class WebhookController @Inject()(
               else if (rsp2.header.status != 200) rsp2
               else                                Ok(details("Push request processed"))
             )
+          case Some(delete: GithubRequest.Delete) =>
+            logger.info(s"Repo: ${delete.repoName} Delete received")
+            webhookConnector
+              .webhook(leakDetectionUrl, request.body)
+              .map {
+                case rsp if rsp.header.status == 200 => Ok(details("Delete request processed"))
+                case rsp                             => rsp
+              }
+          case Some(repository: GithubRequest.Repository) =>
+            logger.info(s"Repo: ${repository.repoName} Repository received")
+            webhookConnector
+              .webhook(leakDetectionUrl, request.body)
+              .map {
+                case rsp if rsp.header.status == 200 => Ok(details("Repository request processed"))
+                case rsp                             => rsp
+              }
           case Some(_: GithubRequest.Ping) =>
             logger.info(s"Ping request received")
             Future.successful(Ok(details("Ping request processed")))

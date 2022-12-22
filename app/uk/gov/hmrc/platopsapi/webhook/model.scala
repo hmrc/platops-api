@@ -98,11 +98,39 @@ object GithubRequest {
     zen: String
   ) extends GithubRequest
 
+  // https://docs.github.com/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#delete
+  final case class Delete(
+    repoName     : String,
+    authorName   : String,
+    branchRef    : String,
+    repositoryUrl: String
+  ) extends GithubRequest
+
+  val readsDelete: Reads[GithubRequest] =
+    ( (__ \ "repository" \ "name" ).read[String]
+    ~ (__ \ "sender"     \ "login").read[String]
+    ~ (__ \ "ref"                 ).read[String].map(_.stripPrefix("refs/heads/"))
+    ~ (__ \ "repository" \ "url"  ).read[String]
+    )(Delete.apply _)
+
+  // https://docs.github.com/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#repository
+  final case class Repository(
+    repoName: String,
+    action  : String
+  ) extends GithubRequest
+
+  val readsRepository: Reads[GithubRequest] =
+    ( (__ \ "repository" \ "name").read[String]
+    ~ (__ \ "action"             ).read[String]
+    )(Repository.apply _)
+
   private val readsPing: Reads[GithubRequest] =
     (__ \ "zen").read[String].map(Ping(_))
 
   val reads: Reads[GithubRequest] =
     readsPullRequest
       .orElse(readsPush)
+      .orElse(readsDelete)
+      .orElse(readsRepository)
       .orElse(readsPing)
 }

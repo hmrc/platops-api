@@ -148,8 +148,9 @@
   },
   "sender": {
     "login": "SomeUser",
-    "id": 1264761,
-    "avatar_url": "https://avatars.githubusercontent.com/u/1264761?v=3",
+    "id": 21031067,
+    "node_id": "MDQ6VXNlcjIxMDMxMDY3",
+    "avatar_url": "https://avatars1.githubusercontent.com/u/21031067?v=4",
     "gravatar_id": "",
     "url": "https://api.github.com/users/SomeUser",
     "html_url": "https://github.com/SomeUser",
