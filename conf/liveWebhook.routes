@@ -1,4 +1,5 @@
 # microservice specific routes
 
-POST        /validate                   uk.gov.hmrc.platopsapi.webhook.WebhookController.leakDetection()
-POST        /pr-commenter/webhook       uk.gov.hmrc.platopsapi.webhook.WebhookController.prCommenter()
+POST        /validate                   uk.gov.hmrc.platopsapi.webhook.WebhookController.processGithubWebhook(keyType: Option[String] = Some("leak-detection"))
+POST        /pr-commenter/webhook       uk.gov.hmrc.platopsapi.webhook.WebhookController.processGithubWebhook(keyType: Option[String] = Some("pr-commenter"))
+

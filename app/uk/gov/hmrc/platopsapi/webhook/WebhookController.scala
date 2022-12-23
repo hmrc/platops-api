@@ -16,36 +16,98 @@
 
 package uk.gov.hmrc.platopsapi.webhook
 
-import play.api.libs.json.JsValue
-import play.api.mvc.{Action, ControllerComponents, Request, Result}
-import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
+import akka.stream.scaladsl.Sink
+import akka.util.ByteString
+import cats.implicits._
+import play.api.{Configuration, Logging}
+import play.api.libs.json.Json
+import play.api.mvc.{ControllerComponents, BodyParser}
+import play.api.libs.streams.Accumulator
+
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import java.net.URL
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
-class WebhookController @Inject()(githubWebhookProxy: GithubWebhookProxy,
-                                  servicesConfig: ServicesConfig,
-                                  cc: ControllerComponents)
-  extends BackendController(cc) {
+class WebhookController @Inject()(
+  config          : Configuration,
+  servicesConfig  : ServicesConfig,
+  webhookConnector: WebhookConnector,
+  cc: ControllerComponents
+)(implicit ec: ExecutionContext) extends BackendController(cc) with Logging {
 
-  lazy private val leakDetectionUrl: URL = url"${servicesConfig.baseUrl("leak-detection")}/leak-detection/validate"
-  lazy private val prCommenterUrl: URL = url"${servicesConfig.baseUrl("pr-commenter")}/pr-commenter/webhook"
+  private val leakDetectionWebhookSecretKey = config.get[String]("github.leakDetectionWebhookSecretKey")
+  private val prCommenterWebhookSecretKey   = config.get[String]("github.prCommenterWebhookSecretKey")
+  private val platopApiWebhookSecretKey     = config.get[String]("github.webhookSecretKey")
+  import uk.gov.hmrc.http.StringContextOps
+  private val leakDetectionUrl  = url"${servicesConfig.baseUrl("leak-detection")}/leak-detection/validate"
+  private val prCommenterUrl    = url"${servicesConfig.baseUrl("pr-commenter")}/pr-commenter/webhook"
+  private val serviceConfigsUrl = url"${servicesConfig.baseUrl("service-configs")}/service-configs/webhook"
 
-  def leakDetection(): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    proxyRequestTo(leakDetectionUrl, request)
+  private val eventMap: Map[WebhookEvent, List[java.net.URL]] = Map(
+    WebhookEvent.Pull       -> List(prCommenterUrl)
+  , WebhookEvent.Push       -> List(leakDetectionUrl, serviceConfigsUrl)
+  , WebhookEvent.Repository -> List(leakDetectionUrl)
+  , WebhookEvent.Ping       -> Nil
+  )
+
+  def processGithubWebhook(keyType: Option[String] = None) =
+    Action.async(
+      BodyParser { rh =>
+        val githubWebhookSecretKey = keyType match {
+          case Some("leak-detection") => leakDetectionWebhookSecretKey
+          case Some("pr-commenter")   => prCommenterWebhookSecretKey
+          case _                      => platopApiWebhookSecretKey
+        }
+        Accumulator(Sink.fold[ByteString, ByteString](ByteString.empty)(_ ++ _))
+          .map(_.utf8String)
+          .map { payloadAsString =>
+            rh.headers.get("X-Hub-Signature-256") match {
+              case Some(sig) if WebhookController.isSignatureValid(payloadAsString, githubWebhookSecretKey, sig)
+                           => Right(payloadAsString)
+              case Some(_) => Left(BadRequest(details("Invalid Signature")))
+              case None    => Left(BadRequest(details("Signature not found in headers")))
+            }
+          }
+      }
+    ) { implicit request =>
+      request
+        .headers
+        .get("X-GitHub-Event")
+        .map(WebhookEvent.parse) match {
+          case Some(Right(event)) => logger.info(s"Forwarding webhook ${event.asString}")
+                                     eventMap(event)
+                                      .traverse(url => webhookConnector.webhook(url, request.body))
+                                      .map(_.find(_.header.status != 200).getOrElse(Ok(details(s"Event type '${event.asString}' processed"))))
+          case Some(Left(other))  => logger.warn(s"Bad request X-GitHub-Event not supported $other")
+                                     Future.successful(BadRequest(details("Invalid event type")))
+          case None               => logger.warn(s"Bad request X-GitHub-Event not specified")
+                                     Future.successful(BadRequest(details("Event type not specified")))
+      }
+    }
+
+  private def details(msg: String) =
+    Json.obj("details" -> msg)
+}
+
+object WebhookController {
+  import org.apache.commons.codec.digest.HmacAlgorithms
+  import javax.crypto.Mac
+  import javax.crypto.spec.SecretKeySpec
+  import javax.xml.bind.DatatypeConverter
+
+  def isSignatureValid(payload: String, secret: String, ghSignature: String): Boolean = {
+    val algorithm  = HmacAlgorithms.HMAC_SHA_256.toString
+    val secretSpec = new SecretKeySpec(secret.getBytes(), algorithm)
+    val hmac       = Mac.getInstance(algorithm)
+
+    hmac.init(secretSpec)
+
+    val sig           = hmac.doFinal(payload.getBytes("UTF-8"))
+    val hashOfPayload = s"sha256=${DatatypeConverter.printHexBinary(sig)}"
+
+    ghSignature.equalsIgnoreCase(hashOfPayload)
   }
-
-  def prCommenter(): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    proxyRequestTo(prCommenterUrl, request)
-  }
-
-  private def proxyRequestTo(url: URL, request: Request[JsValue])(implicit hc: HeaderCarrier): Future[Result] = {
-    githubWebhookProxy
-      .webhook(url, request.body)
-  }
-
 }

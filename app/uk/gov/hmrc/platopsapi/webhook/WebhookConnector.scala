@@ -16,11 +16,10 @@
 
 package uk.gov.hmrc.platopsapi.webhook
 
-import play.api.libs.json.JsValue
 import play.api.mvc.Result
 
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
-import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.platopsapi.ConnectorUtil
 
 import java.net.URL
@@ -28,20 +27,18 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class GithubWebhookProxy @Inject()(httpClientV2: HttpClientV2)(implicit val ec: ExecutionContext) {
+class WebhookConnector @Inject()(
+  httpClientV2    : HttpClientV2,
+)(implicit val ec: ExecutionContext) {
   import HttpReads.Implicits.readRaw
 
-  def webhook(url: URL, body: JsValue)(implicit hc: HeaderCarrier): Future[Result] =
-    webhookRequestWithSignatureHeader(url)
+  def webhook(url: URL, body: String)(implicit hc: HeaderCarrier): Future[Result] =
+    httpClientV2
+      .post(url)
+      .setHeader(hc.otherHeaders.find(_._1 == "X-GitHub-Event").toList: _*)
+      .setHeader(hc.otherHeaders.find(_._1 == "X-Hub-Signature-256").toList: _*)
+      .setHeader("Content-Type" -> "application/json")
       .withBody(body)
       .execute
       .map(ConnectorUtil.toResult)
-
-  private def webhookRequestWithSignatureHeader(url: URL)(implicit hc: HeaderCarrier): RequestBuilder = {
-    val req = httpClientV2.post(url)
-    hc.otherHeaders.filter(_._1 == "X-Hub-Signature-256").headOption match {
-      case Some(h) => req.setHeader(h)
-      case _ => req
-    }
-  }
 }
