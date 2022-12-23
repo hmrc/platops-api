@@ -21,7 +21,7 @@ import akka.util.ByteString
 import cats.implicits._
 import play.api.{Configuration, Logging}
 import play.api.libs.json.Json
-import play.api.mvc.{ControllerComponents, BodyParser, Request, Result}
+import play.api.mvc.{ControllerComponents, BodyParser}
 import play.api.libs.streams.Accumulator
 
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -46,19 +46,11 @@ class WebhookController @Inject()(
   private val prCommenterUrl    = url"${servicesConfig.baseUrl("pr-commenter")}/pr-commenter/webhook"
   private val serviceConfigsUrl = url"${servicesConfig.baseUrl("service-configs")}/service-configs/webhook"
 
-  sealed trait WebhookEvent { def asString: String }
-  object WebhookEvent {
-    case object Pull        extends WebhookEvent { val asString = "Pull"       }
-    case object Push        extends WebhookEvent { val asString = "Push"       }
-    case object Delete      extends WebhookEvent { val asString = "Delete"     }
-    case object Repository  extends WebhookEvent { val asString = "Repository" }
-  }
-
   private val eventMap: Map[WebhookEvent, List[java.net.URL]] = Map(
     WebhookEvent.Pull       -> List(prCommenterUrl)
   , WebhookEvent.Push       -> List(leakDetectionUrl, serviceConfigsUrl)
-  , WebhookEvent.Delete     -> List(leakDetectionUrl)
   , WebhookEvent.Repository -> List(leakDetectionUrl)
+  , WebhookEvent.Ping       -> Nil
   )
 
   def processGithubWebhook(keyType: Option[String] = None) =
@@ -81,34 +73,20 @@ class WebhookController @Inject()(
           }
       }
     ) { implicit request =>
-      Json
-        .parse(request.body)
-        .asOpt[GithubRequest](GithubRequest.reads) match {
-          case Some(pull: GithubRequest.PullRequest) =>
-            logger.info(s"Repo: ${pull.repoName} Pull: ${pull.id} - received")
-            sendWebhooks(WebhookEvent.Pull)
-          case Some(push: GithubRequest.Push) =>
-            logger.info(s"Repo: ${push.repoName} Push received")
-            sendWebhooks(WebhookEvent.Push)
-          case Some(delete: GithubRequest.Delete) =>
-            logger.info(s"Repo: ${delete.repoName} Delete received")
-            sendWebhooks(WebhookEvent.Delete)
-          case Some(repository: GithubRequest.Repository) =>
-            logger.info(s"Repo: ${repository.repoName} Repository received")
-            sendWebhooks(WebhookEvent.Repository)
-          case Some(_: GithubRequest.Ping) =>
-            logger.info(s"Ping request received")
-            Future.successful(Ok(details("Ping request processed")))
-          case None =>
-            logger.info(s"Bad request ${request.body}")
-            Future.successful(BadRequest(details("Invalid payload")))
-        }
+      request
+        .headers
+        .get("X-GitHub-Event")
+        .map(WebhookEvent.parse) match {
+          case Some(Right(event)) => logger.info(s"Forwarding webhook ${event.asString}")
+                                     eventMap(event)
+                                      .traverse(url => webhookConnector.webhook(url, request.body))
+                                      .map(_.find(_.header.status != 200).getOrElse(Ok(details(s"Event type '${event.asString}' processed"))))
+          case Some(Left(other))  => logger.warn(s"Bad request X-GitHub-Event not supported $other")
+                                     Future.successful(BadRequest(details("Invalid event type")))
+          case None               => logger.warn(s"Bad request X-GitHub-Event not specified")
+                                     Future.successful(BadRequest(details("Event type not specified")))
+      }
     }
-
-  private def sendWebhooks(eventType: WebhookEvent)(implicit request: Request[String]): Future[Result] =
-    eventMap(eventType)
-      .traverse(url => webhookConnector.webhook(url, request.body))
-      .map(_.find(_.header.status != 200).getOrElse(Ok(details(s"${eventType.asString} request processed"))))
 
   private def details(msg: String) =
     Json.obj("details" -> msg)

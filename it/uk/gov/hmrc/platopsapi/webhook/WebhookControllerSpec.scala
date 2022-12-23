@@ -33,12 +33,6 @@ class WebhookControllerSpec extends AnyWordSpec
   with WireMockSupport
   with GuiceOneAppPerSuite {
 
-  private def slurp(file: String) = {
-    val path   = java.nio.file.Paths.get(s"${System.getProperty("user.dir")}/$file")
-    val source = scala.io.Source.fromFile(path.toFile)
-    try source.mkString finally source.close()
-  }
-
   implicit val timout = Helpers.defaultNegativeTimeout.t
 
   private val webhookSecretKey = "1234"
@@ -59,21 +53,25 @@ class WebhookControllerSpec extends AnyWordSpec
 
   "WebhookController" should {
     "process a pull request" in {
-      val payload     = slurp("it/resources/pull-request.json")
+      val eventType   = "pull_request"
+      val payload     = """{"foo":"bar"}"""
       val ghSignature = "sha256=" + new HmacUtils(HmacAlgorithms.HMAC_SHA_256, webhookSecretKey).hmacHex(payload)
 
       stubFor(
         post(urlEqualTo("/pr-commenter/webhook"))
+          .withHeader("X-GitHub-Event", equalTo(eventType))
           .withHeader("X-Hub-Signature-256", equalTo(ghSignature))
           .willReturn(aResponse().withStatus(200)))
 
       val result = controller.processGithubWebhook()(
         FakeRequest("POST", "/webhook")
-          .withHeaders("X-Hub-Signature-256" -> ghSignature)
-          .withBody(payload)
+          .withHeaders(
+            "X-GitHub-Event"      -> eventType,
+            "X-Hub-Signature-256" -> ghSignature
+          ).withBody(payload)
       )
       Helpers.status(result)        shouldBe Helpers.OK
-      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Pull request processed")
+      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Event type 'pull_request' processed")
 
       verify(
         postRequestedFor(urlEqualTo("/pr-commenter/webhook"))
@@ -82,11 +80,13 @@ class WebhookControllerSpec extends AnyWordSpec
     }
 
     "process a push" in {
-      val payload     = slurp("it/resources/push.json")
+      val eventType   = "push"
+      val payload     = """{"foo":"bar"}"""
       val ghSignature = "sha256=" + new HmacUtils(HmacAlgorithms.HMAC_SHA_256, webhookSecretKey).hmacHex(payload)
 
       stubFor(
         post(urlEqualTo("/leak-detection/validate"))
+          .withHeader("X-GitHub-Event", equalTo(eventType))
           .withHeader("X-Hub-Signature-256", equalTo(ghSignature))
           .willReturn(aResponse().withStatus(200)))
 
@@ -97,62 +97,47 @@ class WebhookControllerSpec extends AnyWordSpec
 
       val result = controller.processGithubWebhook()(
         FakeRequest("POST", "/webhook")
-          .withHeaders("X-Hub-Signature-256" -> ghSignature)
-          .withBody(payload)
+          .withHeaders(
+            "X-GitHub-Event"      -> eventType,
+            "X-Hub-Signature-256" -> ghSignature
+          ).withBody(payload)
       )
       Helpers.status(result)        shouldBe Helpers.OK
-      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Push request processed")
+      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Event type 'push' processed")
 
       verify(
         postRequestedFor(urlEqualTo("/leak-detection/validate"))
+          .withHeader("X-GitHub-Event", equalTo(eventType))
           .withHeader("X-Hub-Signature-256", equalTo(ghSignature))
           .withRequestBody(equalToJson(payload)))
 
       verify(
         postRequestedFor(urlEqualTo("/service-configs/webhook"))
-          .withHeader("X-Hub-Signature-256", equalTo(ghSignature))
-          .withRequestBody(equalToJson(payload)))
-    }
-
-    "process a delete" in {
-      val payload     = slurp("it/resources/delete.json")
-      val ghSignature = "sha256=" + new HmacUtils(HmacAlgorithms.HMAC_SHA_256, webhookSecretKey).hmacHex(payload)
-
-      stubFor(
-        post(urlEqualTo("/leak-detection/validate"))
-          .withHeader("X-Hub-Signature-256", equalTo(ghSignature))
-          .willReturn(aResponse().withStatus(200)))
-
-      val result = controller.processGithubWebhook()(
-        FakeRequest("POST", "/webhook")
-          .withHeaders("X-Hub-Signature-256" -> ghSignature)
-          .withBody(payload)
-      )
-      Helpers.status(result)        shouldBe Helpers.OK
-      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Delete request processed")
-
-      verify(
-        postRequestedFor(urlEqualTo("/leak-detection/validate"))
+          .withHeader("X-GitHub-Event", equalTo(eventType))
           .withHeader("X-Hub-Signature-256", equalTo(ghSignature))
           .withRequestBody(equalToJson(payload)))
     }
 
     "process a repository" in {
-      val payload     = slurp("it/resources/repository.json")
+      val eventType   = "repository"
+      val payload     = """{"foo":"bar"}"""
       val ghSignature = "sha256=" + new HmacUtils(HmacAlgorithms.HMAC_SHA_256, webhookSecretKey).hmacHex(payload)
 
       stubFor(
         post(urlEqualTo("/leak-detection/validate"))
+          .withHeader("X-GitHub-Event", equalTo(eventType))
           .withHeader("X-Hub-Signature-256", equalTo(ghSignature))
           .willReturn(aResponse().withStatus(200)))
 
       val result = controller.processGithubWebhook()(
         FakeRequest("POST", "/webhook")
-          .withHeaders("X-Hub-Signature-256" -> ghSignature)
-          .withBody(payload)
+          .withHeaders(
+            "X-GitHub-Event"      -> eventType,
+            "X-Hub-Signature-256" -> ghSignature
+          ).withBody(payload)
       )
       Helpers.status(result)        shouldBe Helpers.OK
-      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Repository request processed")
+      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Event type 'repository' processed")
 
       verify(
         postRequestedFor(urlEqualTo("/leak-detection/validate"))

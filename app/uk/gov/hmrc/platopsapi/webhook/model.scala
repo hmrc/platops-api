@@ -16,121 +16,22 @@
 
 package uk.gov.hmrc.platopsapi.webhook
 
-import play.api.libs.functional.syntax._
-import play.api.libs.json.Reads._
-import play.api.libs.json._
-import java.net.{URLEncoder, URL}
 
-sealed trait GithubRequest
+sealed trait WebhookEvent { def asString: String }
 
-object GithubRequest {
+// asString matches X-GitHub-Event https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads
+object WebhookEvent {
+  case object Pull        extends WebhookEvent { val asString = "pull_request"}
+  case object Push        extends WebhookEvent { val asString = "push"        }
+  case object Repository  extends WebhookEvent { val asString = "repository"  }
+  case object Ping        extends WebhookEvent { val asString = "ping"        }
 
-  private def toArchiveUrl(rawArchiveUrl: String, branchRef: String): URL =
-    new URL(
-      rawArchiveUrl
-        .replace("{archive_format}", "zipball")
-        .replace("{/ref}", s"/refs/heads/${URLEncoder.encode(branchRef, "UTF-8")}")
-    )
+  val values: List[WebhookEvent] =
+    List(Pull, Push, Repository, Ping)
 
-  private def toBlobUrl(rawHtmlUrl: String, branchRef: String): URL =
-    new URL(
-      rawHtmlUrl
-        .split("/pull/")
-        .headOption
-        .map(_ + "/blob/" + URLEncoder.encode(branchRef, "UTF-8"))
-        .getOrElse("")
-    )
-
-  // https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#pull_request
-  final case class PullRequest(
-    id        : Long,
-    repoName  : String,
-    archiveUrl: java.net.URL,
-    blobUrl   : java.net.URL,
-    isPrivate : Boolean,
-    branchRef : String,
-    diffUrl   : String,
-    action    : Option[String] = None,
-    author    : String
-  ) extends GithubRequest
-
-  val readsPullRequest: Reads[GithubRequest] =
-    (__ \ "pull_request" \ "head" \ "ref").read[String].flatMap { branchRef =>
-      ( (__ \ "pull_request" \ "number"                     ).read[Long]
-      ~ (__ \ "pull_request" \ "head" \ "repo" \ "name"     ).read[String]
-      ~ (__ \ "repository"   \ "archive_url"                ).read[String].map(toArchiveUrl(_, branchRef))
-      ~ (__ \ "pull_request" \ "html_url"                   ).read[String].map(toBlobUrl(_, branchRef))
-      ~ (__ \ "pull_request" \ "head" \ "repo" \ "private"  ).read[Boolean]
-      ~ Reads.pure(branchRef)
-      ~ (__ \ "pull_request" \ "diff_url"                   ).read[String]
-      ~ (__ \ "action"                                      ).read[String].map(Some(_)) // action is expected here
-      ~ (__ \ "pull_request" \ "user" \ "url"               ).read[String].map(_.split("/").last)
-      )(PullRequest.apply _)
+  def parse(s: String): Either[String, WebhookEvent] =
+    values.find(_.asString == s) match {
+      case Some(x) => Right(x)
+      case None    => Left(s)
     }
-
-  // https://docs.github.com/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#push
-  final case class Push(
-    repoName      : String,
-    isPrivate     : Boolean,
-    isArchived    : Boolean,
-    authorName    : String,
-    branchRef     : String,
-    repositoryUrl : String,
-    commitId      : String,
-    archiveUrl    : String,
-    deleted       : Boolean,
-  ) extends GithubRequest
-
-  val readsPush: Reads[GithubRequest] =
-    ( (__ \ "repository" \ "name"       ).read[String]
-    ~ (__ \ "repository" \ "private"    ).read[Boolean]
-    ~ (__ \ "repository" \ "archived"   ).read[Boolean]
-    ~ (__ \ "pusher"     \ "name"       ).read[String]
-    ~ (__ \ "ref"                       ).read[String].map(_.stripPrefix("refs/heads/"))
-    ~ (__ \ "repository" \ "url"        ).read[String]
-    ~ (__ \ "after"                     ).read[String]
-    ~ (__ \ "repository" \ "archive_url").read[String]
-    ~ (__ \ "deleted"                   ).read[Boolean]
-    )(Push.apply _)
-
-  // https://docs.github.com/en/github-ae@latest/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#ping
-  final case class Ping(
-    zen: String
-  ) extends GithubRequest
-
-  // https://docs.github.com/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#delete
-  final case class Delete(
-    repoName     : String,
-    authorName   : String,
-    branchRef    : String,
-    repositoryUrl: String
-  ) extends GithubRequest
-
-  val readsDelete: Reads[GithubRequest] =
-    ( (__ \ "repository" \ "name" ).read[String]
-    ~ (__ \ "sender"     \ "login").read[String]
-    ~ (__ \ "ref"                 ).read[String].map(_.stripPrefix("refs/heads/"))
-    ~ (__ \ "repository" \ "url"  ).read[String]
-    )(Delete.apply _)
-
-  // https://docs.github.com/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#repository
-  final case class Repository(
-    repoName: String,
-    action  : String
-  ) extends GithubRequest
-
-  val readsRepository: Reads[GithubRequest] =
-    ( (__ \ "repository" \ "name").read[String]
-    ~ (__ \ "action"             ).read[String]
-    )(Repository.apply _)
-
-  private val readsPing: Reads[GithubRequest] =
-    (__ \ "zen").read[String].map(Ping(_))
-
-  val reads: Reads[GithubRequest] =
-    readsPullRequest
-      .orElse(readsPush)
-      .orElse(readsDelete)
-      .orElse(readsRepository)
-      .orElse(readsPing)
 }
