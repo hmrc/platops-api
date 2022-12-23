@@ -21,7 +21,7 @@ import akka.util.ByteString
 import cats.implicits._
 import play.api.{Configuration, Logging}
 import play.api.libs.json.Json
-import play.api.mvc.{ControllerComponents, BodyParser}
+import play.api.mvc.{ControllerComponents, BodyParser, Request, Result}
 import play.api.libs.streams.Accumulator
 
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -45,6 +45,21 @@ class WebhookController @Inject()(
   private val leakDetectionUrl  = url"${servicesConfig.baseUrl("leak-detection")}/leak-detection/validate"
   private val prCommenterUrl    = url"${servicesConfig.baseUrl("pr-commenter")}/pr-commenter/webhook"
   private val serviceConfigsUrl = url"${servicesConfig.baseUrl("service-configs")}/service-configs/webhook"
+
+  sealed trait WebhookEvent { def asString: String }
+  object WebhookEvent {
+    case object Pull        extends WebhookEvent { val asString = "Pull"       }
+    case object Push        extends WebhookEvent { val asString = "Push"       }
+    case object Delete      extends WebhookEvent { val asString = "Delete"     }
+    case object Repository  extends WebhookEvent { val asString = "Repository" }
+  }
+
+  private val eventMap: Map[WebhookEvent, List[java.net.URL]] = Map(
+    WebhookEvent.Pull       -> List(prCommenterUrl)
+  , WebhookEvent.Push       -> List(leakDetectionUrl, serviceConfigsUrl)
+  , WebhookEvent.Delete     -> List(leakDetectionUrl)
+  , WebhookEvent.Repository -> List(leakDetectionUrl)
+  )
 
   def processGithubWebhook(keyType: Option[String] = None) =
     Action.async(
@@ -71,37 +86,16 @@ class WebhookController @Inject()(
         .asOpt[GithubRequest](GithubRequest.reads) match {
           case Some(pull: GithubRequest.PullRequest) =>
             logger.info(s"Repo: ${pull.repoName} Pull: ${pull.id} - received")
-            webhookConnector
-              .webhook(prCommenterUrl, request.body)
-              .map {
-                case rsp if rsp.header.status == 200 => Ok(details("Pull request processed"))
-                case rsp                             => rsp
-              }
+            sendWebhooks(WebhookEvent.Pull)
           case Some(push: GithubRequest.Push) =>
             logger.info(s"Repo: ${push.repoName} Push received")
-            ( webhookConnector.webhook(leakDetectionUrl, request.body)
-            , webhookConnector.webhook(serviceConfigsUrl, request.body)
-            ).mapN( (rsp1, rsp2) =>
-              if      (rsp1.header.status != 200) rsp1
-              else if (rsp2.header.status != 200) rsp2
-              else                                Ok(details("Push request processed"))
-            )
+            sendWebhooks(WebhookEvent.Push)
           case Some(delete: GithubRequest.Delete) =>
             logger.info(s"Repo: ${delete.repoName} Delete received")
-            webhookConnector
-              .webhook(leakDetectionUrl, request.body)
-              .map {
-                case rsp if rsp.header.status == 200 => Ok(details("Delete request processed"))
-                case rsp                             => rsp
-              }
+            sendWebhooks(WebhookEvent.Delete)
           case Some(repository: GithubRequest.Repository) =>
             logger.info(s"Repo: ${repository.repoName} Repository received")
-            webhookConnector
-              .webhook(leakDetectionUrl, request.body)
-              .map {
-                case rsp if rsp.header.status == 200 => Ok(details("Repository request processed"))
-                case rsp                             => rsp
-              }
+            sendWebhooks(WebhookEvent.Repository)
           case Some(_: GithubRequest.Ping) =>
             logger.info(s"Ping request received")
             Future.successful(Ok(details("Ping request processed")))
@@ -110,6 +104,11 @@ class WebhookController @Inject()(
             Future.successful(BadRequest(details("Invalid payload")))
         }
     }
+
+  private def sendWebhooks(eventType: WebhookEvent)(implicit request: Request[String]): Future[Result] =
+    eventMap(eventType)
+      .traverse(url => webhookConnector.webhook(url, request.body))
+      .map(_.find(_.header.status != 200).getOrElse(Ok(details(s"${eventType.asString} request processed"))))
 
   private def details(msg: String) =
     Json.obj("details" -> msg)
