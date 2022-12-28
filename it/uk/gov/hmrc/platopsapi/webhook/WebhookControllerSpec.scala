@@ -60,7 +60,6 @@ class WebhookControllerSpec extends AnyWordSpec
       stubFor(
         post(urlEqualTo("/pr-commenter/webhook"))
           .withHeader("X-GitHub-Event", equalTo(eventType))
-          .withHeader("X-Hub-Signature-256", equalTo(ghSignature))
           .willReturn(aResponse().withStatus(200)))
 
       val result = controller.processGithubWebhook()(
@@ -75,7 +74,6 @@ class WebhookControllerSpec extends AnyWordSpec
 
       verify(
         postRequestedFor(urlEqualTo("/pr-commenter/webhook"))
-          .withHeader("X-Hub-Signature-256", equalTo(ghSignature))
           .withRequestBody(equalToJson(payload)))
     }
 
@@ -87,12 +85,11 @@ class WebhookControllerSpec extends AnyWordSpec
       stubFor(
         post(urlEqualTo("/leak-detection/validate"))
           .withHeader("X-GitHub-Event", equalTo(eventType))
-          .withHeader("X-Hub-Signature-256", equalTo(ghSignature))
           .willReturn(aResponse().withStatus(200)))
 
       stubFor(
         post(urlEqualTo("/service-configs/webhook"))
-          .withHeader("X-Hub-Signature-256", equalTo(ghSignature))
+          .withHeader("X-GitHub-Event", equalTo(eventType))
           .willReturn(aResponse().withStatus(200)))
 
       val result = controller.processGithubWebhook()(
@@ -108,13 +105,11 @@ class WebhookControllerSpec extends AnyWordSpec
       verify(
         postRequestedFor(urlEqualTo("/leak-detection/validate"))
           .withHeader("X-GitHub-Event", equalTo(eventType))
-          .withHeader("X-Hub-Signature-256", equalTo(ghSignature))
           .withRequestBody(equalToJson(payload)))
 
       verify(
         postRequestedFor(urlEqualTo("/service-configs/webhook"))
           .withHeader("X-GitHub-Event", equalTo(eventType))
-          .withHeader("X-Hub-Signature-256", equalTo(ghSignature))
           .withRequestBody(equalToJson(payload)))
     }
 
@@ -126,7 +121,6 @@ class WebhookControllerSpec extends AnyWordSpec
       stubFor(
         post(urlEqualTo("/leak-detection/validate"))
           .withHeader("X-GitHub-Event", equalTo(eventType))
-          .withHeader("X-Hub-Signature-256", equalTo(ghSignature))
           .willReturn(aResponse().withStatus(200)))
 
       val result = controller.processGithubWebhook()(
@@ -141,7 +135,6 @@ class WebhookControllerSpec extends AnyWordSpec
 
       verify(
         postRequestedFor(urlEqualTo("/leak-detection/validate"))
-          .withHeader("X-Hub-Signature-256", equalTo(ghSignature))
           .withRequestBody(equalToJson(payload)))
     }
   }
