@@ -36,7 +36,6 @@ class WebhookConnector @Inject()(
     httpClientV2
       .post(url)
       .setHeader(hc.otherHeaders.find(_._1 == "X-GitHub-Event").toList: _*)
-      .setHeader(hc.otherHeaders.find(_._1 == "X-Hub-Signature-256").toList: _*)
       .setHeader("Content-Type" -> "application/json")
       .withBody(body)
       .execute
