@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,10 +70,11 @@ class WebhookControllerSpec extends AnyWordSpec
           ).withBody(payload)
       )
       Helpers.status(result)        shouldBe Helpers.OK
-      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Event type 'pull_request' processed")
+      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Event type 'pull_request' processing")
 
       verify(
         postRequestedFor(urlEqualTo("/pr-commenter/webhook"))
+          .withHeader("X-GitHub-Event", equalTo(eventType))
           .withRequestBody(equalToJson(payload)))
     }
 
@@ -90,7 +91,7 @@ class WebhookControllerSpec extends AnyWordSpec
       stubFor(
         post(urlEqualTo("/service-configs/webhook"))
           .withHeader("X-GitHub-Event", equalTo(eventType))
-          .willReturn(aResponse().withStatus(200)))
+          .willReturn(aResponse().withStatus(202)))
 
       val result = controller.processGithubWebhook()(
         FakeRequest("POST", "/webhook")
@@ -100,7 +101,7 @@ class WebhookControllerSpec extends AnyWordSpec
           ).withBody(payload)
       )
       Helpers.status(result)        shouldBe Helpers.OK
-      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Event type 'push' processed")
+      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Event type 'push' processing")
 
       verify(
         postRequestedFor(urlEqualTo("/leak-detection/validate"))
@@ -131,10 +132,11 @@ class WebhookControllerSpec extends AnyWordSpec
           ).withBody(payload)
       )
       Helpers.status(result)        shouldBe Helpers.OK
-      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Event type 'repository' processed")
+      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Event type 'repository' processing")
 
       verify(
         postRequestedFor(urlEqualTo("/leak-detection/validate"))
+          .withHeader("X-GitHub-Event", equalTo(eventType))
           .withRequestBody(equalToJson(payload)))
     }
   }
