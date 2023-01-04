@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,10 @@ import akka.stream.scaladsl.Sink
 import akka.util.ByteString
 import cats.implicits._
 import play.api.{Configuration, Logging}
+import play.api.http.{Status => HttpStatus}
 import play.api.libs.json.Json
-import play.api.mvc.{ControllerComponents, BodyParser}
 import play.api.libs.streams.Accumulator
+import play.api.mvc.{ControllerComponents, BodyParser}
 
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -77,10 +78,11 @@ class WebhookController @Inject()(
         .headers
         .get("X-GitHub-Event")
         .map(WebhookEvent.parse) match {
-          case Some(Right(event)) => logger.info(s"Forwarding webhook ${event.asString}")
+          case Some(Right(event)) => logger.info(s"Forwarding webhook ${event.asString} to ${eventMap(event).mkString(" and ")}")
                                      eventMap(event)
                                       .traverse(url => webhookConnector.webhook(url, request.body))
-                                      .map(_.find(_.header.status != 200).getOrElse(Ok(details(s"Event type '${event.asString}' processed"))))
+                                      .map(_.find(x => !HttpStatus.isSuccessful(x.header.status)))
+                                      .map(_.getOrElse(Ok(details(s"Event type '${event.asString}' processing"))))
           case Some(Left(other))  => logger.warn(s"Bad request X-GitHub-Event not supported $other")
                                      Future.successful(BadRequest(details("Invalid event type")))
           case None               => logger.warn(s"Bad request X-GitHub-Event not specified")
