@@ -1,5 +1,4 @@
 import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
 lazy val microservice = Project("platops-api", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
@@ -11,7 +10,6 @@ lazy val microservice = Project("platops-api", file("."))
     scalacOptions            +=  "-Wconf:src=routes/.*:s"
 
   )
-  .settings(publishingSettings: _*)
   .configs(IntegrationTest)
   .settings(integrationTestSettings(): _*)
   .settings(resolvers += Resolver.jcenterRepo)
