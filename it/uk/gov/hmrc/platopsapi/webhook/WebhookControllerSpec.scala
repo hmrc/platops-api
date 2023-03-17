@@ -39,13 +39,15 @@ class WebhookControllerSpec extends AnyWordSpec
 
   override lazy val app: Application = new GuiceApplicationBuilder()
     .configure(
-      "github.webhookSecretKey"                    -> webhookSecretKey,
-      "microservice.services.leak-detection.host"  -> wireMockHost,
-      "microservice.services.leak-detection.port"  -> wireMockPort,
-      "microservice.services.pr-commenter.host"    -> wireMockHost,
-      "microservice.services.pr-commenter.port"    -> wireMockPort,
-      "microservice.services.service-configs.host" -> wireMockHost,
-      "microservice.services.service-configs.port" -> wireMockPort
+      "github.webhookSecretKey"                           -> webhookSecretKey,
+      "microservice.services.leak-detection.host"         -> wireMockHost,
+      "microservice.services.leak-detection.port"         -> wireMockPort,
+      "microservice.services.pr-commenter.host"           -> wireMockHost,
+      "microservice.services.pr-commenter.port"           -> wireMockPort,
+      "microservice.services.service-configs.host"        -> wireMockHost,
+      "microservice.services.service-configs.port"        -> wireMockPort,
+      "microservice.services.teams-and-repositories.host" -> wireMockHost,
+      "microservice.services.teams-and-repositories.port" -> wireMockPort
     ).build()
 
   private val controller = app.injector.instanceOf[WebhookController]
@@ -93,6 +95,11 @@ class WebhookControllerSpec extends AnyWordSpec
           .withHeader("X-GitHub-Event", equalTo(eventType))
           .willReturn(aResponse().withStatus(202)))
 
+      stubFor(
+        post(urlEqualTo("/teams-and-repositories/webhook"))
+          .withHeader("X-GitHub-Event", equalTo(eventType))
+          .willReturn(aResponse().withStatus(202)))
+
       val result = controller.processGithubWebhook()(
         FakeRequest("POST", "/webhook")
           .withHeaders(
@@ -110,6 +117,11 @@ class WebhookControllerSpec extends AnyWordSpec
 
       verify(
         postRequestedFor(urlEqualTo("/service-configs/webhook"))
+          .withHeader("X-GitHub-Event", equalTo(eventType))
+          .withRequestBody(equalToJson(payload)))
+
+      verify(
+        postRequestedFor(urlEqualTo("/teams-and-repositories/webhook"))
           .withHeader("X-GitHub-Event", equalTo(eventType))
           .withRequestBody(equalToJson(payload)))
     }

@@ -1,7 +1,5 @@
 # Add all the application routes to the app.routes file
 ->         /api                       app.Routes
-->         /webhooks                  labsWebhook.Routes
-->         /                          liveWebhook.Routes
 ->         /                          health.Routes
 
 POST       /webhook                   uk.gov.hmrc.platopsapi.webhook.WebhookController.processGithubWebhook()
