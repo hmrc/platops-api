@@ -39,34 +39,28 @@ class WebhookController @Inject()(
   cc: ControllerComponents
 )(implicit ec: ExecutionContext) extends BackendController(cc) with Logging {
 
-  private val leakDetectionWebhookSecretKey = config.get[String]("github.leakDetectionWebhookSecretKey")
-  private val prCommenterWebhookSecretKey   = config.get[String]("github.prCommenterWebhookSecretKey")
   private val platopApiWebhookSecretKey     = config.get[String]("github.webhookSecretKey")
   import uk.gov.hmrc.http.StringContextOps
   private val leakDetectionUrl  = url"${servicesConfig.baseUrl("leak-detection")}/leak-detection/validate"
   private val prCommenterUrl    = url"${servicesConfig.baseUrl("pr-commenter")}/pr-commenter/webhook"
   private val serviceConfigsUrl = url"${servicesConfig.baseUrl("service-configs")}/service-configs/webhook"
+  private val teamsAndReposUrl  = url"${servicesConfig.baseUrl("teams-and-repositories")}/teams-and-repositories/webhook"
 
   private val eventMap: Map[WebhookEvent, List[java.net.URL]] = Map(
     WebhookEvent.Pull       -> List(prCommenterUrl)
-  , WebhookEvent.Push       -> List(leakDetectionUrl, serviceConfigsUrl)
+  , WebhookEvent.Push       -> List(leakDetectionUrl, serviceConfigsUrl, teamsAndReposUrl)
   , WebhookEvent.Repository -> List(leakDetectionUrl)
   , WebhookEvent.Ping       -> Nil
   )
 
-  def processGithubWebhook(keyType: Option[String] = None) =
+  def processGithubWebhook() =
     Action.async(
       BodyParser { rh =>
-        val githubWebhookSecretKey = keyType match {
-          case Some("leak-detection") => leakDetectionWebhookSecretKey
-          case Some("pr-commenter")   => prCommenterWebhookSecretKey
-          case _                      => platopApiWebhookSecretKey
-        }
         Accumulator(Sink.fold[ByteString, ByteString](ByteString.empty)(_ ++ _))
           .map(_.utf8String)
           .map { payloadAsString =>
             rh.headers.get("X-Hub-Signature-256") match {
-              case Some(sig) if WebhookController.isSignatureValid(payloadAsString, githubWebhookSecretKey, sig)
+              case Some(sig) if WebhookController.isSignatureValid(payloadAsString, platopApiWebhookSecretKey, sig)
                            => Right(payloadAsString)
               case Some(_) => Left(BadRequest(details("Invalid Signature")))
               case None    => Left(BadRequest(details("Signature not found in headers")))
