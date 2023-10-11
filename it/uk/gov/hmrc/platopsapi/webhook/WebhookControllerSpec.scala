@@ -40,6 +40,8 @@ class WebhookControllerSpec extends AnyWordSpec
   override lazy val app: Application = new GuiceApplicationBuilder()
     .configure(
       "github.webhookSecretKey"                           -> webhookSecretKey,
+      "microservice.services.internal-auth.host"          -> wireMockHost,
+      "microservice.services.internal-auth.port"          -> wireMockPort,
       "microservice.services.leak-detection.host"         -> wireMockHost,
       "microservice.services.leak-detection.port"         -> wireMockPort,
       "microservice.services.pr-commenter.host"           -> wireMockHost,
@@ -136,6 +138,11 @@ class WebhookControllerSpec extends AnyWordSpec
           .withHeader("X-GitHub-Event", equalTo(eventType))
           .willReturn(aResponse().withStatus(200)))
 
+      stubFor(
+        post(urlEqualTo("/internal-auth/webhook"))
+          .withHeader("X-GitHub-Event", equalTo(eventType))
+          .willReturn(aResponse().withStatus(200)))
+
       val result = controller.processGithubWebhook()(
         FakeRequest("POST", "/webhook")
           .withHeaders(
@@ -148,6 +155,11 @@ class WebhookControllerSpec extends AnyWordSpec
 
       verify(
         postRequestedFor(urlEqualTo("/leak-detection/validate"))
+          .withHeader("X-GitHub-Event", equalTo(eventType))
+          .withRequestBody(equalToJson(payload)))
+
+      verify(
+        postRequestedFor(urlEqualTo("/internal-auth/webhook"))
           .withHeader("X-GitHub-Event", equalTo(eventType))
           .withRequestBody(equalToJson(payload)))
     }
