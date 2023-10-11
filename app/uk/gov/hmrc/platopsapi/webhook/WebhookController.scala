@@ -73,6 +73,7 @@ class WebhookController @Inject()(
         .get("X-GitHub-Event")
         .map(WebhookEvent.parse) match {
           case Some(Right(event)) => logger.info(s"Forwarding webhook ${event.asString} to ${eventMap(event).mkString(" and ")}")
+                                     logger.info(s"${event.asString} received with body: ${request.body}")
                                      eventMap(event)
                                       .traverse(url => webhookConnector.webhook(url, request.body))
                                       .map(_.find(x => !HttpStatus.isSuccessful(x.header.status)))
