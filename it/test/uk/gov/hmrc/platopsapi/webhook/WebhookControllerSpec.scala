@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.platopsapi.webhook
+package test.uk.gov.hmrc.platopsapi.webhook
 
 import akka.stream.Materializer
 import com.github.tomakehurst.wiremock.client.WireMock._
@@ -27,6 +27,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.test.WireMockSupport
+import uk.gov.hmrc.platopsapi.webhook.WebhookController
 
 class WebhookControllerSpec extends AnyWordSpec
   with Matchers

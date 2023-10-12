@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.platopsapi.api
+package test.uk.gov.hmrc.platopsapi
 
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.ws.WSClient
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
 
-import java.time.Instant
-
-class ApiControllerISpec
+class HealthEndpointIntegrationSpec
   extends AnyWordSpec
      with Matchers
      with ScalaFutures
@@ -37,20 +34,20 @@ class ApiControllerISpec
   private val wsClient = app.injector.instanceOf[WSClient]
   private val baseUrl  = s"http://localhost:$port"
 
-  "GET /api/v2/teams" should {
-    case class TeamName(name: String, createdDate: Instant, lastActiveDate: Instant, repos: Int)
+  override def fakeApplication(): Application =
+    GuiceApplicationBuilder()
+      .configure("metrics.enabled" -> false)
+      .build()
 
-    implicit val reads: Reads[TeamName] =
-      ( (__ \ "name"          ).read[String]
-      ~ (__ \ "createdDate"   ).read[Instant]
-      ~ (__ \ "lastActiveDate").read[Instant]
-      ~ (__ \ "repos"         ).read[Int]
-      )(TeamName.apply _)
+  "service health endpoint" should {
+    "respond with 200 status" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/ping/ping")
+          .get()
+          .futureValue
 
-    "return a list of teams" in {
-      val response = wsClient.url(s"$baseUrl/api/v2/teams").get().futureValue
       response.status shouldBe 200
-      Json.parse(response.body).as[List[TeamName]]
     }
   }
 }

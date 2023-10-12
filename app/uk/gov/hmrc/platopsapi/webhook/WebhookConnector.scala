@@ -17,7 +17,6 @@
 package uk.gov.hmrc.platopsapi.webhook
 
 import play.api.mvc.Result
-
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.platopsapi.ConnectorUtil
