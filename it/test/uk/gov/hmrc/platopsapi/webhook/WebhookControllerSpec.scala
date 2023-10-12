@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.platopsapi.webhook
+package test.uk.gov.hmrc.platopsapi.webhook
 
 import akka.stream.Materializer
 import com.github.tomakehurst.wiremock.client.WireMock._
@@ -27,6 +27,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.test.WireMockSupport
+import uk.gov.hmrc.platopsapi.webhook.WebhookController
 
 class WebhookControllerSpec extends AnyWordSpec
   with Matchers
@@ -40,6 +41,8 @@ class WebhookControllerSpec extends AnyWordSpec
   override lazy val app: Application = new GuiceApplicationBuilder()
     .configure(
       "github.webhookSecretKey"                           -> webhookSecretKey,
+      "microservice.services.internal-auth.host"          -> wireMockHost,
+      "microservice.services.internal-auth.port"          -> wireMockPort,
       "microservice.services.leak-detection.host"         -> wireMockHost,
       "microservice.services.leak-detection.port"         -> wireMockPort,
       "microservice.services.pr-commenter.host"           -> wireMockHost,
@@ -136,6 +139,11 @@ class WebhookControllerSpec extends AnyWordSpec
           .withHeader("X-GitHub-Event", equalTo(eventType))
           .willReturn(aResponse().withStatus(200)))
 
+      stubFor(
+        post(urlEqualTo("/internal-auth/webhook"))
+          .withHeader("X-GitHub-Event", equalTo(eventType))
+          .willReturn(aResponse().withStatus(200)))
+
       val result = controller.processGithubWebhook()(
         FakeRequest("POST", "/webhook")
           .withHeaders(
@@ -148,6 +156,11 @@ class WebhookControllerSpec extends AnyWordSpec
 
       verify(
         postRequestedFor(urlEqualTo("/leak-detection/validate"))
+          .withHeader("X-GitHub-Event", equalTo(eventType))
+          .withRequestBody(equalToJson(payload)))
+
+      verify(
+        postRequestedFor(urlEqualTo("/internal-auth/webhook"))
           .withHeader("X-GitHub-Event", equalTo(eventType))
           .withRequestBody(equalToJson(payload)))
     }

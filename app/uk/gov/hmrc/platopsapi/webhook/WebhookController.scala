@@ -41,6 +41,7 @@ class WebhookController @Inject()(
 
   private val platopApiWebhookSecretKey     = config.get[String]("github.webhookSecretKey")
   import uk.gov.hmrc.http.StringContextOps
+  private val internalAuthUrl   = url"${servicesConfig.baseUrl("internal-auth")}/internal-auth/webhook"
   private val leakDetectionUrl  = url"${servicesConfig.baseUrl("leak-detection")}/leak-detection/validate"
   private val prCommenterUrl    = url"${servicesConfig.baseUrl("pr-commenter")}/pr-commenter/webhook"
   private val serviceConfigsUrl = url"${servicesConfig.baseUrl("service-configs")}/service-configs/webhook"
@@ -49,7 +50,7 @@ class WebhookController @Inject()(
   private val eventMap: Map[WebhookEvent, List[java.net.URL]] = Map(
     WebhookEvent.Pull       -> List(prCommenterUrl)
   , WebhookEvent.Push       -> List(leakDetectionUrl, serviceConfigsUrl, teamsAndReposUrl)
-  , WebhookEvent.Repository -> List(leakDetectionUrl)
+  , WebhookEvent.Repository -> List(internalAuthUrl, leakDetectionUrl)
   , WebhookEvent.Ping       -> Nil
   )
 

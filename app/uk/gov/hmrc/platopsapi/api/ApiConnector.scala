@@ -18,7 +18,6 @@ package uk.gov.hmrc.platopsapi.api
 
 import play.api.libs.ws.BodyWritable
 import play.api.mvc.Result
-
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.platopsapi.ConnectorUtil
