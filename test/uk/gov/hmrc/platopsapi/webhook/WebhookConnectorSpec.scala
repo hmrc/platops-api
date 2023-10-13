@@ -20,7 +20,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-
+import play.api.Configuration
 import uk.gov.hmrc.http.test.{HttpClientV2Support, WireMockSupport}
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 
@@ -43,7 +43,7 @@ class WebhookConnectorSpec extends AnyWordSpec
         )
     )
 
-    val onTest = new WebhookConnector(httpClientV2)
+    val onTest = new WebhookConnector(httpClientV2, Configuration("internal-auth.token" -> "token"))
 
     "pass provided body and github event header to webhook request" in {
       stubbedResponse()
@@ -55,6 +55,7 @@ class WebhookConnectorSpec extends AnyWordSpec
         postRequestedFor(urlEqualTo("/webhook"))
           .withRequestBody(equalToJson("""{"some": "value"}"""))
           .withHeader("X-GitHub-Event", equalTo("push"))
+          .withHeader("Authorization", equalTo("token"))
       )
     }
 

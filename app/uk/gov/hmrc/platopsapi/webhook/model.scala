@@ -25,9 +25,10 @@ object WebhookEvent {
   case object Push        extends WebhookEvent { val asString = "push"        }
   case object Repository  extends WebhookEvent { val asString = "repository"  }
   case object Ping        extends WebhookEvent { val asString = "ping"        }
+  case object Team        extends WebhookEvent { val asString = "team"        }
 
   val values: List[WebhookEvent] =
-    List(Pull, Push, Repository, Ping)
+    List(Pull, Push, Repository, Ping, Team)
 
   def parse(s: String): Either[String, WebhookEvent] =
     values.find(_.asString == s) match {

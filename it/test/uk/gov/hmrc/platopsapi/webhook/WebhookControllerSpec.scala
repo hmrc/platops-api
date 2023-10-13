@@ -139,11 +139,6 @@ class WebhookControllerSpec extends AnyWordSpec
           .withHeader("X-GitHub-Event", equalTo(eventType))
           .willReturn(aResponse().withStatus(200)))
 
-      stubFor(
-        post(urlEqualTo("/internal-auth/webhook"))
-          .withHeader("X-GitHub-Event", equalTo(eventType))
-          .willReturn(aResponse().withStatus(200)))
-
       val result = controller.processGithubWebhook()(
         FakeRequest("POST", "/webhook")
           .withHeaders(
@@ -156,11 +151,6 @@ class WebhookControllerSpec extends AnyWordSpec
 
       verify(
         postRequestedFor(urlEqualTo("/leak-detection/validate"))
-          .withHeader("X-GitHub-Event", equalTo(eventType))
-          .withRequestBody(equalToJson(payload)))
-
-      verify(
-        postRequestedFor(urlEqualTo("/internal-auth/webhook"))
           .withHeader("X-GitHub-Event", equalTo(eventType))
           .withRequestBody(equalToJson(payload)))
     }
