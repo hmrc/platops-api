@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.platopsapi.webhook
 
+import play.api.Configuration
 import play.api.mvc.Result
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.http.client.HttpClientV2
@@ -28,13 +29,17 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class WebhookConnector @Inject()(
   httpClientV2    : HttpClientV2,
+  config          : Configuration
 )(implicit val ec: ExecutionContext) {
   import HttpReads.Implicits.readRaw
+
+  private val internalAuthToken: String = config.get[String]("internal-auth.token")
 
   def webhook(url: URL, body: String)(implicit hc: HeaderCarrier): Future[Result] =
     httpClientV2
       .post(url)
       .setHeader(hc.otherHeaders.find(_._1 == "X-GitHub-Event").toList: _*)
+      .setHeader("Authorization" -> internalAuthToken)
       .setHeader("Content-Type" -> "application/json")
       .withBody(body)
       .execute
