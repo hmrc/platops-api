@@ -50,7 +50,8 @@ class WebhookController @Inject()(
   private val eventMap: Map[WebhookEvent, List[java.net.URL]] = Map(
     WebhookEvent.Pull       -> List(prCommenterUrl)
   , WebhookEvent.Push       -> List(leakDetectionUrl, serviceConfigsUrl, teamsAndReposUrl)
-  , WebhookEvent.Repository -> List(internalAuthUrl, leakDetectionUrl)
+  , WebhookEvent.Repository -> List(leakDetectionUrl)
+  , WebhookEvent.Team       -> List(internalAuthUrl)
   , WebhookEvent.Ping       -> Nil
   )
 
@@ -74,6 +75,7 @@ class WebhookController @Inject()(
         .get("X-GitHub-Event")
         .map(WebhookEvent.parse) match {
           case Some(Right(event)) => logger.info(s"Forwarding webhook ${event.asString} to ${eventMap(event).mkString(" and ")}")
+                                     logger.info(s"${event.asString} event received with body: ${request.body}")
                                      eventMap(event)
                                       .traverse(url => webhookConnector.webhook(url, request.body))
                                       .map(_.find(x => !HttpStatus.isSuccessful(x.header.status)))
