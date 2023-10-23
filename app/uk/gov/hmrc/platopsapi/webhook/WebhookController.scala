@@ -51,7 +51,7 @@ class WebhookController @Inject()(
     WebhookEvent.Pull       -> List(prCommenterUrl)
   , WebhookEvent.Push       -> List(leakDetectionUrl, serviceConfigsUrl, teamsAndReposUrl)
   , WebhookEvent.Repository -> List(leakDetectionUrl)
-  , WebhookEvent.Team       -> List(internalAuthUrl)
+  , WebhookEvent.Team       -> List(internalAuthUrl, teamsAndReposUrl)
   , WebhookEvent.Ping       -> Nil
   )
 
