@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package test.uk.gov.hmrc.platopsapi.webhook
+package uk.gov.hmrc.platopsapi.webhook
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.apache.commons.codec.digest.{HmacAlgorithms, HmacUtils}
+import org.apache.pekko.util.Timeout
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -34,7 +35,7 @@ class WebhookControllerSpec extends AnyWordSpec
   with WireMockSupport
   with GuiceOneAppPerSuite {
 
-  implicit val timout = Helpers.defaultNegativeTimeout.t
+  implicit val timout: Timeout = Helpers.defaultNegativeTimeout.t
 
   private val webhookSecretKey = "1234"
 

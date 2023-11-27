@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.platopsapi.api
 
-import akka.util.ByteString
-import akka.stream.scaladsl.Source
+import org.apache.pekko.util.ByteString
+import org.apache.pekko.stream.scaladsl.Source
 import play.api.mvc.{BodyParser, ControllerComponents}
 import play.api.libs.streams.Accumulator
 import uk.gov.hmrc.http.StringContextOps

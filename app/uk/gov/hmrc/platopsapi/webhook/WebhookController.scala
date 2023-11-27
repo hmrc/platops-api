@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.platopsapi.webhook
 
-import akka.stream.scaladsl.Sink
-import akka.util.ByteString
+import org.apache.pekko.stream.scaladsl.Sink
+import org.apache.pekko.util.ByteString
 import cats.implicits._
 import play.api.{Configuration, Logging}
 import play.api.http.{Status => HttpStatus}
