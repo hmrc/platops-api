@@ -35,7 +35,7 @@ class WebhookControllerSpec extends AnyWordSpec
   with WireMockSupport
   with GuiceOneAppPerSuite {
 
-  implicit val timout: Timeout = Helpers.defaultNegativeTimeout.t
+  implicit val timout: Timeout = Helpers.defaultAwaitTimeout
 
   private val webhookSecretKey = "1234"
 
