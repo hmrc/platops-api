@@ -24,7 +24,6 @@ import play.api.http.{Status => HttpStatus}
 import play.api.libs.json.Json
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{ControllerComponents, BodyParser}
-
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
@@ -92,9 +91,9 @@ class WebhookController @Inject()(
 
 object WebhookController {
   import org.apache.commons.codec.digest.HmacAlgorithms
+  import org.apache.commons.codec.binary.Hex
   import javax.crypto.Mac
   import javax.crypto.spec.SecretKeySpec
-  import javax.xml.bind.DatatypeConverter
 
   def isSignatureValid(payload: String, secret: String, ghSignature: String): Boolean = {
     val algorithm  = HmacAlgorithms.HMAC_SHA_256.toString
@@ -104,7 +103,7 @@ object WebhookController {
     hmac.init(secretSpec)
 
     val sig           = hmac.doFinal(payload.getBytes("UTF-8"))
-    val hashOfPayload = s"sha256=${DatatypeConverter.printHexBinary(sig)}"
+    val hashOfPayload = s"sha256=${Hex.encodeHexString(sig)}"
 
     ghSignature.equalsIgnoreCase(hashOfPayload)
   }
