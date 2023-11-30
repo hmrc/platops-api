@@ -5,3 +5,5 @@ POST /repositories/:repoName/prs/:prId/comments/buildhook      uk.gov.hmrc.plato
 
 # Teams and Repositories
 GET  /v2/teams                                                 uk.gov.hmrc.platopsapi.api.ApiController.teams()
+
+GET  /logABigMessage                                           uk.gov.hmrc.platopsapi.api.ApiController.logABigMessage()
