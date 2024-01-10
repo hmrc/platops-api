@@ -49,7 +49,7 @@ class WebhookController @Inject()(
   private val eventMap: Map[WebhookEvent, List[java.net.URL]] = Map(
     WebhookEvent.Pull       -> List(prCommenterUrl)
   , WebhookEvent.Push       -> List(leakDetectionUrl, serviceConfigsUrl, teamsAndReposUrl)
-  , WebhookEvent.Repository -> List(leakDetectionUrl)
+  , WebhookEvent.Repository -> List(leakDetectionUrl, teamsAndReposUrl)
   , WebhookEvent.Team       -> List(internalAuthUrl, teamsAndReposUrl)
   , WebhookEvent.Ping       -> Nil
   )
