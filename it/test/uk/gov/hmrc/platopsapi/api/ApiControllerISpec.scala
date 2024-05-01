@@ -38,19 +38,31 @@ class ApiControllerISpec
   private val baseUrl  = s"http://localhost:$port"
 
   "GET /api/v2/teams" should {
-    case class TeamName(name: String, createdDate: Instant, lastActiveDate: Instant, repos: Int)
+    case class TeamName(name: String, lastActiveDate: Option[Instant], repos:List[String])
 
     implicit val reads: Reads[TeamName] =
       ( (__ \ "name"          ).read[String]
-      ~ (__ \ "createdDate"   ).read[Instant]
-      ~ (__ \ "lastActiveDate").read[Instant]
-      ~ (__ \ "repos"         ).read[Int]
+      ~ (__ \ "lastActiveDate").readNullable[Instant]
+      ~ (__ \ "repos"         ).read[List[String]]
       )(TeamName.apply _)
 
     "return a list of teams" in {
       val response = wsClient.url(s"$baseUrl/api/v2/teams").get().futureValue
       response.status shouldBe 200
       Json.parse(response.body).as[List[TeamName]]
+    }
+  }
+
+  "GET /api/v2/decommissioned-services" should {
+    case class DecommissionedService(repoName: String)
+
+    implicit val reads: Reads[DecommissionedService] =
+      (__ \ "repoName").read[String].map(DecommissionedService.apply)
+
+    "return a list of decommissioned services" in {
+      val response = wsClient.url(s"$baseUrl/api/v2/decommissioned-services").get().futureValue
+      response.status shouldBe 200
+      Json.parse(response.body).as[List[DecommissionedService]]
     }
   }
 }
