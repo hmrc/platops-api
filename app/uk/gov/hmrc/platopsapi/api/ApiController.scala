@@ -46,6 +46,11 @@ class ApiController @Inject()(
 
   private val teamsAndRepositoriesUrl = servicesConfig.baseUrl("teams-and-repositories")
 
+  def decommissionedServices() =
+    Action.async { implicit request =>
+      apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/decommissioned-services")
+    }
+
   def teams() =
     Action.async { implicit request =>
       apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/teams")
