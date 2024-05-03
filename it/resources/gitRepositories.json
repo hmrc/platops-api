@@ -1,0 +1,37 @@
+[
+  {
+    "name": "repo-1",
+    "description": "",
+    "url": "https://github.com/hmrc/repo-1",
+    "createdDate": "2014-03-11T19:59:49Z",
+    "lastActiveDate": "2020-12-03T12:57:55Z",
+    "isPrivate": false,
+    "repoType": "Service",
+    "serviceType": "Backend",
+    "owningTeams": ["PlatOps"],
+    "language": "Scala",
+    "isArchived": true,
+    "defaultBranch": "main",
+    "isDeprecated": true,
+    "teamNames": ["PlatOps"],
+    "tags": []
+  },
+  {
+    "name": "repo-2",
+    "description": "",
+    "url": "https://github.com/hmrc/repo-2",
+    "createdDate": "2014-03-11T19:59:49Z",
+    "lastActiveDate": "2020-12-03T12:57:55Z",
+    "isPrivate": false,
+    "repoType": "Service",
+    "serviceType": "Frontend",
+    "digitalServiceName": "",
+    "owningTeams": ["PlatOps"],
+    "language": "Scala",
+    "defaultBranch": "main",
+    "isArchived": false,
+    "isDeprecated": false,
+    "teamNames": ["PlatOps"],
+    "tags": []
+  }
+]

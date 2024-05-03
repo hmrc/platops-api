@@ -1,0 +1,24 @@
+[
+  {
+    "name": "repo-3",
+    "deletedDate": "2023-10-15T08:00:00Z",
+    "isPrivate": true,
+    "repoType": "Service",
+    "serviceType": "Backend",
+    "digitalServiceName": "",
+    "owningTeams": ["team1", "team2"],
+    "teams": ["team3"],
+    "prototypeName": ""
+  },
+  {
+    "name": "repo-4",
+    "deletedDate": "2023-11-20T11:30:00Z",
+    "isPrivate": false,
+    "repoType": "Service",
+    "serviceType": "Frontend",
+    "digitalServiceName": "",
+    "owningTeams": ["team4"],
+    "teams": ["team3"],
+    "prototypeName": ""
+  }
+]
