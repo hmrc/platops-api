@@ -16,15 +16,14 @@
 
 package uk.gov.hmrc.platopsapi.api
 
-import org.apache.pekko.actor.ActorSystem
 import org.scalatest.Assertion
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.ws.WSClient
-import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import uk.gov.hmrc.platopsapi.models.RepoType
 
 import java.io.File
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -39,20 +38,43 @@ class ApiControllerISpec
      with IntegrationPatience
      with GuiceOneServerPerSuite {
 
-  "GET /api/v2/decommissioned-services" should {
+  "GET /api/v2/decommissioned-repositories" should {
+    "return a list of decommissioned repositories" in new Setup {
+      for {
+        _ <- delete(s"$teamsAndReposBaseUrl/test-only/repos")
+        _ <- post(s"$teamsAndReposBaseUrl/test-only/repos", fromResource("gitRepositories.json"))
+        _ <- put(s"$teamsAndReposBaseUrl/test-only/deleted-repos", fromResource("deletedGitRepositories.json"))
+      } yield ()
 
-    case class DecommissionedService(repoName: String)
-    implicit val reads: Reads[DecommissionedService] = (__ \ "repoName").read[String].map(DecommissionedService.apply)
+      val response =
+        wsClient
+          .url(s"$baseUrl/api/decommissioned-repositories")
+          .get()
+          .futureValue
+
+      response.status shouldBe 200
+      response.json   shouldBe Json.parse(
+        """[{"repoName":"repo-1", "repoType": "Service"},{"repoName":"repo-3", "repoType": "Service"},{"repoName":"repo-4","repoType": "Library"},{"repoName":"repo-5","repoType": "Other"}]"""
+      )
+    }
 
     "return a list of decommissioned services" in new Setup {
-      post(s"$teamsAndReposBaseUrl/test-only/repos",         fromResource("/it/resources/gitRepositories.json"))
-      post(s"$teamsAndReposBaseUrl/test-only/deleted-repos", fromResource("/it/resources/deletedGitRepositories.json"))
+      for {
+        _ <- delete(s"$teamsAndReposBaseUrl/test-only/repos")
+        _ <- post(s"$teamsAndReposBaseUrl/test-only/repos", fromResource("gitRepositories.json"))
+        _ <- put(s"$teamsAndReposBaseUrl/test-only/deleted-repos", fromResource("deletedGitRepositories.json"))
+      } yield ()
 
-      val response = wsClient.url(s"$baseUrl/api/v2/decommissioned-services").get().futureValue
+      val response =
+        wsClient
+          .url(s"$baseUrl/api/decommissioned-repositories?repoType=${RepoType.Service}")
+          .get()
+          .futureValue
+
       response.status shouldBe 200
-
-      val parsedList = Json.parse(response.body).as[List[DecommissionedService]]
-      parsedList.map(_.repoName) should contain allOf("repo-1", "repo-3", "repo-4")
+      response.json   shouldBe Json.parse(
+        """[{"repoName":"repo-1", "repoType": "Service"},{"repoName":"repo-3", "repoType": "Service"}]"""
+      )
     }
   }
 
@@ -62,6 +84,15 @@ class ApiControllerISpec
     val teamsAndReposBaseUrl = s"http://localhost:9015"
 
     private def is2xx(status: Int) = status >= 200 && status < 300
+
+    def put(url: String, payload: String): Future[Unit] =
+      wsClient
+        .url(url)
+        .withHttpHeaders("content-type" -> "application/json")
+        .put(payload)
+        .map { response =>
+          assert(is2xx(response.status), s"Failed to call stub PUT $url: ${response.body}")
+        }
 
     def post(url: String, payload: String): Future[Assertion] =
       wsClient
@@ -74,8 +105,18 @@ class ApiControllerISpec
           Future.failed(new RuntimeException(s"Failed to call stub POST $url: ${e.getMessage}", e))
         }
 
+    def delete(url: String): Future[Assertion] =
+      wsClient
+        .url(url)
+        .delete()
+        .map { response =>
+          assert(is2xx(response.status), s"Failed to call stub DELETE $url: ${response.body}")
+        }.recoverWith { case e =>
+          Future.failed(new RuntimeException(s"Failed to call stub DELETE $url: ${e.getMessage}", e))
+        }
 
-    def fromResource(resourcePath: String): String =
+    def fromResource(resource: String): String = {
+      val resourcePath = s"it/resources/$resource"
       Option(new File(System.getProperty("user.dir"), resourcePath))
         .fold(
           sys.error(s"Could not find resource at $resourcePath")
@@ -86,6 +127,6 @@ class ApiControllerISpec
             sys.error(s"Error reading resource from $resourcePath")
           }
         )
+    }
   }
 }
-

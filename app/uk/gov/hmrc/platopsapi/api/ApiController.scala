@@ -21,6 +21,7 @@ import org.apache.pekko.stream.scaladsl.Source
 import play.api.mvc.{BodyParser, ControllerComponents}
 import play.api.libs.streams.Accumulator
 import uk.gov.hmrc.http.StringContextOps
+import uk.gov.hmrc.platopsapi.models.RepoType
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
@@ -46,9 +47,9 @@ class ApiController @Inject()(
 
   private val teamsAndRepositoriesUrl = servicesConfig.baseUrl("teams-and-repositories")
 
-  def decommissionedServices() =
+  def decommissionedRepos(repoType: Option[RepoType] = None) =
     Action.async { implicit request =>
-      apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/decommissioned-services")
+      apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/decommissioned-repositories?repoType=$repoType")
     }
 
   def teams() =

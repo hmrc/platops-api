@@ -4,4 +4,4 @@
 POST /repositories/:repoName/prs/:prId/comments/buildhook      uk.gov.hmrc.platopsapi.api.ApiController.prCommenterBuildhook(repoName: String, prId: Long)
 
 # Teams and Repositories
-GET  /v2/decommissioned-services                               uk.gov.hmrc.platopsapi.api.ApiController.decommissionedServices()
+GET /decommissioned-repositories                               uk.gov.hmrc.platopsapi.api.ApiController.decommissionedRepos(repoType: Option[RepoType])
