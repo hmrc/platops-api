@@ -12,5 +12,6 @@ object AppDependencies {
 
   val test = Seq(
     "uk.gov.hmrc"             %% "bootstrap-test-play-30"     % bootstrapVersion    % Test,
+    "org.mongodb.scala"       %% "mongo-scala-driver"         % "4.8.1"             % Test
   )
 }

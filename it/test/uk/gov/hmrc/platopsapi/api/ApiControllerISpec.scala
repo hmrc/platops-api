@@ -19,8 +19,10 @@ package uk.gov.hmrc.platopsapi.api
 import org.scalatest.Assertion
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
+import org.mongodb.scala._
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.ws.WSClient
 import play.api.libs.json._
 import uk.gov.hmrc.platopsapi.models.RepoType
@@ -38,13 +40,13 @@ class ApiControllerISpec
      with IntegrationPatience
      with GuiceOneServerPerSuite {
 
-  "GET /api/v2/decommissioned-repositories" should {
+  "GET /api/decommissioned-repositories" should {
     "return a list of decommissioned repositories" in new Setup {
-      for {
-        _ <- delete(s"$teamsAndReposBaseUrl/test-only/repos")
-        _ <- post(s"$teamsAndReposBaseUrl/test-only/repos", fromResource("gitRepositories.json"))
-        _ <- put(s"$teamsAndReposBaseUrl/test-only/deleted-repos", fromResource("deletedGitRepositories.json"))
-      } yield ()
+      checkMongoProdData(dbNames).futureValue
+
+      delete(s"$teamsAndReposBaseUrl/test-only/repos").futureValue
+      post(s"$teamsAndReposBaseUrl/test-only/repos", fromResource("gitRepositories.json")).futureValue
+      put(s"$teamsAndReposBaseUrl/test-only/deleted-repos", fromResource("deletedGitRepositories.json")).futureValue
 
       val response =
         wsClient
@@ -59,11 +61,11 @@ class ApiControllerISpec
     }
 
     "return a list of decommissioned services" in new Setup {
-      for {
-        _ <- delete(s"$teamsAndReposBaseUrl/test-only/repos")
-        _ <- post(s"$teamsAndReposBaseUrl/test-only/repos", fromResource("gitRepositories.json"))
-        _ <- put(s"$teamsAndReposBaseUrl/test-only/deleted-repos", fromResource("deletedGitRepositories.json"))
-      } yield ()
+      checkMongoProdData(dbNames).futureValue
+
+      delete(s"$teamsAndReposBaseUrl/test-only/repos").futureValue
+      post(s"$teamsAndReposBaseUrl/test-only/repos", fromResource("gitRepositories.json")).futureValue
+      put(s"$teamsAndReposBaseUrl/test-only/deleted-repos", fromResource("deletedGitRepositories.json")).futureValue
 
       val response =
         wsClient
@@ -82,18 +84,22 @@ class ApiControllerISpec
     val wsClient             = app.injector.instanceOf[WSClient]
     val baseUrl              = s"http://localhost:$port"
     val teamsAndReposBaseUrl = s"http://localhost:9015"
+    val dbNames              = Seq("teams-and-repositories")
 
     private def is2xx(status: Int) = status >= 200 && status < 300
 
-    def put(url: String, payload: String): Future[Unit] =
+    def put(url: String, payload: String): Future[Assertion] =
       wsClient
         .url(url)
         .withHttpHeaders("content-type" -> "application/json")
         .put(payload)
         .map { response =>
           assert(is2xx(response.status), s"Failed to call stub PUT $url: ${response.body}")
+        }.recoverWith { case e =>
+          Future.failed(new RuntimeException(s"Failed to call stub POST $url: ${e.getMessage}", e))
         }
 
+    //TODO replace with PUT
     def post(url: String, payload: String): Future[Assertion] =
       wsClient
         .url(url)
@@ -105,6 +111,7 @@ class ApiControllerISpec
           Future.failed(new RuntimeException(s"Failed to call stub POST $url: ${e.getMessage}", e))
         }
 
+    //TODO replace with PUT
     def delete(url: String): Future[Assertion] =
       wsClient
         .url(url)
@@ -127,6 +134,33 @@ class ApiControllerISpec
             sys.error(s"Error reading resource from $resourcePath")
           }
         )
+    }
+
+    def checkMongoProdData(dbNames: Seq[String]): Future[Unit] = {
+      val dataThreshold     = 1000000 // bytes
+      val dataThresholdAsMb = dataThreshold / 1e+6
+
+      case class Database(name : String, sizeOnDisk: Long)
+
+      object Database {
+        implicit val reads: Reads[Database] =
+          ( (__ \ "name"      ).read[String]
+          ~ (__ \ "sizeOnDisk").read[Long]
+          )(Database.apply _)
+      }
+
+      MongoClient()
+        .listDatabases()
+        .toFuture()
+        .map {
+          _.map(document => Json.parse(document.toJson()).as[Database](Database.reads))
+            .filter(db => dbNames.contains(db.name))
+            .filter(db => db.sizeOnDisk > dataThreshold && db.name != "local")
+        }.map {
+          case dbs if dbs.isEmpty => ()
+          case dbs                => throw new Exception(s"The following databases were detected to have real data (more than $dataThresholdAsMb mb): " +
+                                       s"${dbs.map(_.name).mkString(", ")}. Ensure you run the local mongo setup script to start an ephemeral mongo instance.")
+        }
     }
   }
 }
