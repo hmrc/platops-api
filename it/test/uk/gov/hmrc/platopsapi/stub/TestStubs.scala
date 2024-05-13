@@ -1,4 +1,4 @@
-package stub
+package uk.gov.hmrc.platopsapi.stub
 
 import org.apache.pekko.actor.ActorSystem
 import org.mongodb.scala.MongoClient
@@ -6,7 +6,6 @@ import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{Json, Reads, __}
 import play.api.libs.ws.{WSClient, WSClientConfig}
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
-import uk.gov.hmrc.platopsapi.config.StubConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import java.io.File
@@ -16,11 +15,12 @@ import scala.io.Source
 import scala.util.Using
 
 object TestStubs {
-  private val dbNames                = Set("teams-and-repositories")
+  private val teamsAndRepositoriesBaseUrl = "http://localhost:9015"
+  private val dbNames                     = Set("teams-and-repositories")
 
-  private val gitRepositories        = s"${StubConfig.teamsAndRepositoriesBaseUrl}/test-only/repos"
-  private val deletedGitRepositories = s"${StubConfig.teamsAndRepositoriesBaseUrl}/test-only/deleted-repos"
-  private val teamSummaries          = s"${StubConfig.teamsAndRepositoriesBaseUrl}/test-only/team-summaries"
+  private val gitRepositories             = s"$teamsAndRepositoriesBaseUrl/test-only/repos"
+  private val deletedGitRepositories      = s"$teamsAndRepositoriesBaseUrl/test-only/deleted-repos"
+  private val teamSummaries               = s"$teamsAndRepositoriesBaseUrl/test-only/team-summaries"
 
   private val wsClient: WSClient = {
     implicit val as: ActorSystem = ActorSystem("test-actor-system")

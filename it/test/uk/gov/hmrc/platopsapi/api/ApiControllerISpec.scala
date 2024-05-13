@@ -23,7 +23,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json._
 import play.api.libs.ws.WSClient
-import stub.TestStubs
+import uk.gov.hmrc.platopsapi.stub.TestStubs
 
 class ApiControllerISpec
   extends AnyWordSpec
