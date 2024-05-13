@@ -14,11 +14,6 @@ lazy val microservice = Project("platops-api", file("."))
   )
   .settings(resolvers += Resolver.jcenterRepo)
   .settings(CodeCoverageSettings.settings: _*)
-  .settings(
-    RoutesKeys.routesImport ++= Seq(
-      "uk.gov.hmrc.platopsapi.models.RepoType"
-    )
-  )
 
 lazy val it =
     (project in file("it"))

@@ -1,7 +1,9 @@
 
 # platops-api
 
-This service is the only officially supported api of the platops infrastructure.
+- This service is the only officially supported API within the PlatOps infrastructure.
+- It exposes catalogue apis for external teams and directs webhooks to the relevant microservice.
+- These apis should be rigorously tested to ensure backward-compatibility.
 
 ### License
 
@@ -27,8 +29,6 @@ Note: the tests in this repo are destructive to the data in MongoDB and assume t
 You can either do a `git pull` on the checked out repository, or with `sm2` just call `sm2 --update-config`
 
 ### Before
-
-To start catalogue-frontend and all dependent services you can run service-manager.
 
 For Service manager to run, you should:
 
