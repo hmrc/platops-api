@@ -33,7 +33,8 @@ class ApiController @Inject()(
   cc            : ControllerComponents
   ) extends BackendController(cc) {
 
-  private val prCommenterUrl = servicesConfig.baseUrl("pr-commenter")
+  private val prCommenterUrl           = servicesConfig.baseUrl("pr-commenter")
+  private val teamsAndRepositoriesUrl  = servicesConfig.baseUrl("teams-and-repositories")
 
   private def streamParser: BodyParser[Source[ByteString, _]] = BodyParser { _ =>
     Accumulator.source[ByteString].map(Right.apply)(cc.executionContext)
@@ -44,7 +45,10 @@ class ApiController @Inject()(
       apiConnector.post(url"$prCommenterUrl/pr-commenter/repositories/$repoName/prs/$prId/comments/buildhook", request.body)
     }
 
-  private val teamsAndRepositoriesUrl = servicesConfig.baseUrl("teams-and-repositories")
+  def decommissionedRepos(repoType: Option[String] = None) =
+    Action.async { implicit request =>
+      apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/decommissioned-repositories?repoType=$repoType")
+    }
 
   def teams() =
     Action.async { implicit request =>

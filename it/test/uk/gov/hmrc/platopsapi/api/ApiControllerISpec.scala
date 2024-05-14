@@ -16,41 +16,83 @@
 
 package uk.gov.hmrc.platopsapi.api
 
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-
-import play.api.libs.ws.WSClient
-import play.api.libs.functional.syntax._
 import play.api.libs.json._
-
-import java.time.Instant
+import play.api.libs.ws.WSClient
+import uk.gov.hmrc.platopsapi.stub.TestStubs
 
 class ApiControllerISpec
   extends AnyWordSpec
-     with Matchers
-     with ScalaFutures
-     with IntegrationPatience
-     with GuiceOneServerPerSuite {
+    with BeforeAndAfterAll
+    with Matchers
+    with ScalaFutures
+    with IntegrationPatience
+    with GuiceOneServerPerSuite {
 
   private val wsClient = app.injector.instanceOf[WSClient]
   private val baseUrl  = s"http://localhost:$port"
 
-  "GET /api/v2/teams" should {
-    case class TeamName(name: String, createdDate: Instant, lastActiveDate: Instant, repos: Int)
+  override def beforeAll(): Unit = {
+     TestStubs.resetAll()
+     super.beforeAll()
+  }
 
-    implicit val reads: Reads[TeamName] =
-      ( (__ \ "name"          ).read[String]
-      ~ (__ \ "createdDate"   ).read[Instant]
-      ~ (__ \ "lastActiveDate").read[Instant]
-      ~ (__ \ "repos"         ).read[Int]
-      )(TeamName.apply _)
+  "GET /api/v2/decommissioned-repositories" should {
+    "return a list of all decommissioned repositories" in {
+      val response = wsClient
+        .url(s"$baseUrl/api/v2/decommissioned-repositories")
+        .get()
+        .futureValue
 
-    "return a list of teams" in {
-      val response = wsClient.url(s"$baseUrl/api/v2/teams").get().futureValue
       response.status shouldBe 200
-      Json.parse(response.body).as[List[TeamName]]
+      response.json   shouldBe Json.parse(
+        """[{"repoName":"repo-1", "repoType": "Service"},{"repoName":"repo-3", "repoType": "Service"},{"repoName":"repo-4","repoType": "Library"},{"repoName":"repo-5","repoType": "Other"}]"""
+      )
+    }
+
+    "return a list of decommissioned services" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/api/v2/decommissioned-repositories?repoType=Service")
+          .get()
+          .futureValue
+
+      response.status shouldBe 200
+      response.json   shouldBe Json.parse(
+        """[{"repoName":"repo-1", "repoType": "Service"},{"repoName":"repo-3", "repoType": "Service"}]"""
+      )
+    }
+  }
+
+  "GET /api/v2/teams" should {
+    "return a list of team summaries" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/api/v2/teams")
+          .get()
+          .futureValue
+
+      response.status shouldBe 200
+      response.json   shouldBe Json.parse(
+        """[
+          |  {
+          |    "name": "Team A",
+          |    "lastActiveDate": "2024-05-08T16:24:37Z",
+          |    "repos": [
+          |      "repo-1",
+          |      "repo-2"
+          |    ]
+          |  },
+          |  {
+          |    "name": "Team B",
+          |    "repos": []
+          |  }
+          |]""".stripMargin
+      )
     }
   }
 }
