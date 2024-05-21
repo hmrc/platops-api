@@ -6,3 +6,7 @@ POST /repositories/:repoName/prs/:prId/comments/buildhook      uk.gov.hmrc.plato
 # Teams and Repositories
 GET  /v2/teams                                                 uk.gov.hmrc.platopsapi.api.ApiController.teams()
 GET  /v2/decommissioned-repositories                           uk.gov.hmrc.platopsapi.api.ApiController.decommissionedRepos(repoType: Option[String])
+
+# Releases
+GET  /whats-running-where                                      uk.gov.hmrc.platopsapi.api.ApiController.whatsRunningWhere()
+GET  /whats-running-where/:serviceName                         uk.gov.hmrc.platopsapi.api.ApiController.whatsRunningWhereForService(serviceName: String)

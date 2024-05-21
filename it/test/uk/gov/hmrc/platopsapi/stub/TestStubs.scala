@@ -16,11 +16,13 @@ import scala.util.Using
 
 object TestStubs {
   private val teamsAndRepositoriesBaseUrl = "http://localhost:9015"
-  private val dbNames                     = Set("teams-and-repositories")
+  private val releasesApiBaseUrl          = "http://localhost:8008"
+  private val dbNames                     = Set("teams-and-repositories", "releases") // add database name here to check for production data
 
-  private val gitRepositories             = s"$teamsAndRepositoriesBaseUrl/test-only/repos"
-  private val deletedGitRepositories      = s"$teamsAndRepositoriesBaseUrl/test-only/deleted-repos"
-  private val teamSummaries               = s"$teamsAndRepositoriesBaseUrl/test-only/team-summaries"
+  private val gitRepositories        = s"$teamsAndRepositoriesBaseUrl/test-only/repos"
+  private val deletedGitRepositories = s"$teamsAndRepositoriesBaseUrl/test-only/deleted-repos"
+  private val teamSummaries          = s"$teamsAndRepositoriesBaseUrl/test-only/team-summaries"
+  private val releaseEvents          = s"$releasesApiBaseUrl/test-only/release-events"
 
   private val wsClient: WSClient = {
     implicit val as: ActorSystem = ActorSystem("test-actor-system")
@@ -62,9 +64,12 @@ object TestStubs {
   private def resetServices(): Future[List[Unit]] = {
     Future.sequence(
       List(
+        //teams-and-repositories
         delete(gitRepositories).flatMap(_ => post(gitRepositories, fromResource("gitRepositories.json"))),
         put(deletedGitRepositories, fromResource("deletedGitRepositories.json")),
-        delete(teamSummaries).flatMap(_ => post(teamSummaries, fromResource("teamSummaries.json")))
+        delete(teamSummaries).flatMap(_ => post(teamSummaries, fromResource("teamSummaries.json"))),
+        //releases-api
+        delete(releaseEvents).flatMap(_ => post(releaseEvents, fromResource("deploymentEvents.json")))
       )
     )
   }
@@ -73,11 +78,10 @@ object TestStubs {
 
   object Database {
     implicit val reads: Reads[Database] =
-      ((__ \ "name"       ).read[String]
+      ( (__ \ "name"      ).read[String]
       ~ (__ \ "sizeOnDisk").read[Long]
       )(Database.apply _)
   }
-
 
   private def checkMongoProdData(): Future[Unit] = {
     val dataThreshold = 1000000 // bytes
@@ -109,7 +113,7 @@ object TestStubs {
     )
 
   private def fromResource(resource: String): String = {
-    val resourcePath = s"it/resources/$resource"
+    val resourcePath = s"it/resources/seedCollectionsJson/$resource"
     Option(new File(System.getProperty("user.dir"), resourcePath))
       .fold(
         sys.error(s"Could not find resource at $resourcePath")

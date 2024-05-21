@@ -25,6 +25,10 @@ import play.api.libs.json._
 import play.api.libs.ws.WSClient
 import uk.gov.hmrc.platopsapi.stub.TestStubs
 
+import java.io.File
+import scala.io.Source
+import scala.util.Using
+
 class ApiControllerISpec
   extends AnyWordSpec
     with BeforeAndAfterAll
@@ -94,5 +98,56 @@ class ApiControllerISpec
           |]""".stripMargin
       )
     }
+  }
+
+  "GET /api/whats-running-where" should {
+    "return a list of what's running where data" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/api/whats-running-where")
+          .get()
+          .futureValue
+
+      response.status shouldBe 200
+      response.json shouldBe Json.parse(fromResource("whatsRunningWhere.json"))
+    }
+  }
+
+  "GET /api/whats-running-where/:serviceName" should {
+    "return what's running where data for a single service" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/api/whats-running-where/catalogue-frontend")
+          .get()
+          .futureValue
+
+      val expectedJson     = Json.parse(fromResource("whatsRunningWhereForService.json"))
+
+      val actualName       = (response.json \ "applicationName").as[String]
+      val expectedName     = (expectedJson  \ "applicationName").as[String]
+
+      val actualVersions   = (response.json \ "versions").as[Seq[JsObject]]
+      val expectedVersions = (expectedJson  \ "versions").as[Seq[JsObject]]
+
+      response.status shouldBe 200
+      actualName      shouldBe expectedName
+
+      actualVersions should contain theSameElementsAs expectedVersions
+    }
+  }
+
+  private def fromResource(resource: String): String = {
+    val resourcePath = s"it/resources/verifyEndPointJson/$resource"
+    Option(new File(System.getProperty("user.dir"), resourcePath))
+      .fold(
+        sys.error(s"Could not find resource at $resourcePath")
+      )(
+        resource =>
+          Using(Source.fromFile(resource)) { source =>
+            source.mkString
+          }.getOrElse {
+            sys.error(s"Error reading resource from $resourcePath")
+          }
+      )
   }
 }

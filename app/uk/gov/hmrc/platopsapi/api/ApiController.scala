@@ -35,6 +35,7 @@ class ApiController @Inject()(
 
   private val prCommenterUrl           = servicesConfig.baseUrl("pr-commenter")
   private val teamsAndRepositoriesUrl  = servicesConfig.baseUrl("teams-and-repositories")
+  private val releasesApiUrl           = servicesConfig.baseUrl("releases-api")
 
   private def streamParser: BodyParser[Source[ByteString, _]] = BodyParser { _ =>
     Accumulator.source[ByteString].map(Right.apply)(cc.executionContext)
@@ -53,5 +54,15 @@ class ApiController @Inject()(
   def teams() =
     Action.async { implicit request =>
       apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/teams")
+    }
+
+  def whatsRunningWhere() =
+    Action.async { implicit request =>
+      apiConnector.get(url"$releasesApiUrl/releases-api/whats-running-where")
+    }
+
+  def whatsRunningWhereForService(serviceName: String) =
+    Action.async { implicit request =>
+      apiConnector.get(url"$releasesApiUrl/releases-api/whats-running-where/$serviceName")
     }
 }

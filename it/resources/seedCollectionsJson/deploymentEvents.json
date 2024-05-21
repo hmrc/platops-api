@@ -1,0 +1,101 @@
+[
+  {
+    "stack_id"            : "0",
+    "event_type"          : "deployment-complete",
+    "microservice_version": "4.254.0",
+    "event_date_time"     : "1969-12-28T00:00:00.000Z",
+    "microservice"        : "catalogue-frontend",
+    "environment"         : "development",
+    "deployer_principal"  : "jenkins-orchestrator"
+  },
+  {
+    "stack_id"            : "1",
+    "event_type"          : "deployment-complete",
+    "microservice_version": "4.255.0",
+    "event_date_time"     : "1969-12-28T00:00:00.000Z",
+    "microservice"        : "catalogue-frontend",
+    "environment"         : "staging",
+    "deployer_principal"  : "jenkins-orchestrator"
+  },
+  {
+    "stack_id"            : "2",
+    "event_type"          : "deployment-complete",
+    "microservice_version": "4.255.0",
+    "event_date_time"     : "2020-06-11T15:22:00.000Z",
+    "microservice"        : "catalogue-frontend",
+    "environment"         : "qa",
+    "deployer_principal"  : "joe.bloggs"
+  },
+  {
+    "stack_id"            : "3",
+    "event_type"          : "deployment-complete",
+    "microservice_version": "4.255.0",
+    "event_date_time"     : "2020-06-11T15:22:00.000Z",
+    "microservice"        : "catalogue-frontend",
+    "environment"         : "externaltest",
+    "deployer_principal"  : "joe.bloggs"
+  },
+  {
+    "stack_id"            : "4",
+    "event_type"          : "deployment-complete",
+    "microservice_version": "4.255.0",
+    "event_date_time"     : "2020-06-11T15:22:00.000Z",
+    "microservice"        : "catalogue-frontend",
+    "environment"         : "production",
+    "deployer_principal"  : "joe.bloggs"
+  },
+  {
+    "stack_id"            : "5",
+    "event_type"          : "deployment-complete",
+    "microservice_version": "6.159.0",
+    "event_date_time"     : "1969-12-28T00:00:00.000Z",
+    "microservice"        : "play-authorisation",
+    "environment"         : "staging",
+    "deployer_principal"  : "jenkins-orchestrator"
+  },
+  {
+    "stack_id"            : "6",
+    "event_type"          : "deployment-complete",
+    "microservice_version": "6.160.0",
+    "event_date_time"     : "1969-12-28T00:00:00.000Z",
+    "microservice"        : "play-authorisation",
+    "environment"         : "production",
+    "deployer_principal"  : "jenkins-orchestrator"
+  },
+  {
+    "stack_id"            : "7",
+    "event_type"          : "deployment-complete",
+    "microservice_version": "1.119.0",
+    "event_date_time"     : "1969-12-28T00:00:00.000Z",
+    "microservice"        : "service-dependencies",
+    "environment"         : "staging",
+    "deployer_principal"  : "jenkins-orchestrator"
+  },
+  {
+    "stack_id"            : "8",
+    "event_type"          : "deployment-complete",
+    "microservice_version": "1.118.0",
+    "event_date_time"     : "1969-12-28T00:00:00.000Z",
+    "microservice"        : "service-dependencies",
+    "environment"         : "production",
+    "deployer_principal"  : "jenkins-orchestrator"
+  },
+  {
+    "stack_id"            : "9",
+    "event_type"          : "deployment-complete",
+    "microservice_version": "6.160.0",
+    "event_date_time"     : "2020-06-09T14:18:24.000Z",
+    "microservice"        : "user-details",
+    "environment"         : "staging",
+    "deployer_principal"  : "joe.bloggs"
+  },
+  {
+    "stack_id"            : "10",
+    "event_type"          : "deployment-complete",
+    "microservice_version": "6.159.0",
+    "event_date_time"     : "2020-06-09T14:18:24.000Z",
+    "microservice"        : "user-details",
+    "environment"         : "production",
+    "deployer_principal"  : "joe.bloggs"
+  }
+]
