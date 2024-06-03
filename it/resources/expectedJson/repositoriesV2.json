@@ -7,14 +7,20 @@
     "lastActiveDate": "2020-12-03T12:57:55Z",
     "isPrivate": false,
     "repoType": "Service",
-    "serviceType": "Backend",
-    "owningTeams": ["PlatOps"],
+    "serviceType": "backend",
+    "tags": [
+      "api"
+    ],
+    "owningTeams": [
+      "PlatOps"
+    ],
     "language": "Scala",
     "isArchived": true,
     "defaultBranch": "main",
     "isDeprecated": true,
-    "teamNames": ["PlatOps"],
-    "tags": ["api"]
+    "teamNames": [
+      "PlatOps"
+    ]
   },
   {
     "name": "repo-2",
@@ -24,15 +30,19 @@
     "lastActiveDate": "2020-12-03T12:57:55Z",
     "isPrivate": false,
     "repoType": "Service",
-    "serviceType": "Frontend",
+    "serviceType": "frontend",
+    "tags": [],
     "digitalServiceName": "",
-    "owningTeams": ["PlatOps"],
+    "owningTeams": [
+      "PlatOps"
+    ],
     "language": "Scala",
-    "defaultBranch": "main",
     "isArchived": false,
+    "defaultBranch": "main",
     "isDeprecated": false,
-    "teamNames": ["PlatOps"],
-    "tags": []
+    "teamNames": [
+      "PlatOps"
+    ]
   },
   {
     "name": "repo-3",
@@ -42,14 +52,18 @@
     "lastActiveDate": "2020-12-03T12:57:55Z",
     "isPrivate": false,
     "repoType": "Library",
+    "tags": [],
     "digitalServiceName": "",
-    "owningTeams": ["PlatOps"],
+    "owningTeams": [
+      "PlatOps"
+    ],
     "language": "Scala",
-    "defaultBranch": "main",
     "isArchived": false,
+    "defaultBranch": "main",
     "isDeprecated": false,
-    "teamNames": ["PlatOps"],
-    "tags": []
+    "teamNames": [
+      "PlatOps"
+    ]
   },
   {
     "name": "repo-4",
@@ -59,14 +73,18 @@
     "lastActiveDate": "2020-12-03T12:57:55Z",
     "isPrivate": false,
     "repoType": "Other",
+    "tags": [],
     "digitalServiceName": "",
-    "owningTeams": ["PlatOps"],
+    "owningTeams": [
+      "PlatOps"
+    ],
     "language": "Scala",
-    "defaultBranch": "main",
     "isArchived": false,
+    "defaultBranch": "main",
     "isDeprecated": false,
-    "teamNames": ["PlatOps"],
-    "tags": []
+    "teamNames": [
+      "PlatOps"
+    ]
   },
   {
     "name": "repo-5",
@@ -76,14 +94,18 @@
     "lastActiveDate": "2020-12-03T12:57:55Z",
     "isPrivate": false,
     "repoType": "Prototype",
+    "tags": [],
     "digitalServiceName": "",
-    "owningTeams": ["PlatOps"],
+    "owningTeams": [
+      "PlatOps"
+    ],
     "language": "Scala",
-    "defaultBranch": "main",
     "isArchived": false,
+    "defaultBranch": "main",
     "isDeprecated": false,
-    "teamNames": ["PlatOps"],
-    "tags": []
+    "teamNames": [
+      "PlatOps"
+    ]
   },
   {
     "name": "repo-6",
@@ -93,14 +115,18 @@
     "lastActiveDate": "2020-12-03T12:57:55Z",
     "isPrivate": false,
     "repoType": "Test",
+    "tags": [],
     "digitalServiceName": "",
-    "owningTeams": ["PlatOps"],
+    "owningTeams": [
+      "PlatOps"
+    ],
     "language": "Scala",
-    "defaultBranch": "main",
     "isArchived": false,
+    "defaultBranch": "main",
     "isDeprecated": false,
-    "teamNames": ["PlatOps"],
-    "tags": []
+    "teamNames": [
+      "PlatOps"
+    ]
   },
   {
     "name": "repo-7",
@@ -110,14 +136,20 @@
     "lastActiveDate": "2020-12-03T12:57:55Z",
     "isPrivate": false,
     "repoType": "Service",
-    "serviceType": "Backend",
+    "serviceType": "backend",
+    "tags": [
+      "api"
+    ],
     "digitalServiceName": "",
-    "owningTeams": ["TestTeam"],
+    "owningTeams": [
+      "TestTeam"
+    ],
     "language": "Scala",
-    "defaultBranch": "main",
     "isArchived": false,
+    "defaultBranch": "main",
     "isDeprecated": false,
-    "teamNames": ["TestTeam"],
-    "tags": ["api"]
+    "teamNames": [
+      "TestTeam"
+    ]
   }
 ]

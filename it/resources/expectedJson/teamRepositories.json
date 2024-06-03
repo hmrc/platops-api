@@ -1,0 +1,50 @@
+[
+  {
+    "name": "PlatOps",
+    "createdDate": "2014-03-11T19:59:49Z",
+    "lastActiveDate": "2020-12-03T12:57:55Z",
+    "repos": {
+      "Other": [
+        "repo-4"
+      ],
+      "Prototype": [
+        "repo-5"
+      ],
+      "Library": [
+        "repo-3"
+      ],
+      "Service": [
+        "repo-1",
+        "repo-2"
+      ],
+      "Test": [
+        "repo-6"
+      ]
+    },
+    "ownedRepos": [
+      "repo-2",
+      "repo-3",
+      "repo-4",
+      "repo-5",
+      "repo-6",
+      "repo-1"
+    ]
+  },
+  {
+    "name": "TestTeam",
+    "createdDate": "2014-03-11T19:59:49Z",
+    "lastActiveDate": "2020-12-03T12:57:55Z",
+    "repos": {
+      "Other": [],
+      "Prototype": [],
+      "Library": [],
+      "Service": [
+        "repo-7"
+      ],
+      "Test": []
+    },
+    "ownedRepos": [
+      "repo-7"
+    ]
+  }
+]

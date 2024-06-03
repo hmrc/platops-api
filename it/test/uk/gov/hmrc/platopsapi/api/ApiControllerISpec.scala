@@ -45,6 +45,178 @@ class ApiControllerISpec
      super.beforeAll()
   }
 
+  "GET /api/v2/repositories" should {
+    "return a list of all repositories" in {
+      val response = wsClient
+        .url(s"$baseUrl/api/v2/repositories")
+        .get()
+        .futureValue
+
+      response.status shouldBe 200
+      response.json   shouldBe Json.parse(fromResource("repositoriesV2.json"))
+    }
+
+    "return a repository by name" in {
+      val response = wsClient
+        .url(s"$baseUrl/api/v2/repositories?name=repo-7")
+        .get()
+        .futureValue
+
+      response.status shouldBe 200
+      response.json   shouldBe Json.parse(
+        """
+          |[
+          |  {
+          |    "name": "repo-7",
+          |    "description": "service",
+          |    "url": "https://github.com/hmrc/repo-7",
+          |    "createdDate": "2014-03-11T19:59:49Z",
+          |    "lastActiveDate": "2020-12-03T12:57:55Z",
+          |    "isPrivate": false,
+          |    "repoType": "Service",
+          |    "serviceType": "backend",
+          |    "tags": [
+          |      "api"
+          |    ],
+          |    "digitalServiceName": "",
+          |    "owningTeams": [
+          |      "TestTeam"
+          |    ],
+          |    "language": "Scala",
+          |    "isArchived": false,
+          |    "defaultBranch": "main",
+          |    "isDeprecated": false,
+          |    "teamNames": [
+          |      "TestTeam"
+          |    ]
+          |  }
+          |]""".stripMargin
+      )
+    }
+
+    "return list of repositories associated with a team" in {
+      val team     = "PlatOps"
+      val response = wsClient
+        .url(s"$baseUrl/api/v2/repositories?team=$team")
+        .get()
+        .futureValue
+
+      val res = response.json.as[Seq[JsObject]]
+
+      response.status shouldBe 200
+      res.size        shouldBe 6
+      res.forall(obj => (obj \ "teamNames").as[Seq[String]].contains(team))
+      res.head        shouldBe Json.parse(
+        """
+          |{
+          |  "name": "repo-1",
+          |  "description": "archived",
+          |  "url": "https://github.com/hmrc/repo-1",
+          |  "createdDate": "2014-03-11T19:59:49Z",
+          |  "lastActiveDate": "2020-12-03T12:57:55Z",
+          |  "isPrivate": false,
+          |  "repoType": "Service",
+          |  "serviceType": "backend",
+          |  "tags": [
+          |    "api"
+          |  ],
+          |  "owningTeams": [
+          |    "PlatOps"
+          |  ],
+          |  "language": "Scala",
+          |  "isArchived": true,
+          |  "defaultBranch": "main",
+          |  "isDeprecated": true,
+          |  "teamNames": [
+          |    "PlatOps"
+          |  ]
+          |}
+          |""".stripMargin
+      )
+    }
+
+    "return list of repositories by an owning team" in {
+      val team = "TestTeam"
+      val response = wsClient
+        .url(s"$baseUrl/api/v2/repositories?owningTeam=$team")
+        .get()
+        .futureValue
+
+      val res = response.json.as[Seq[JsObject]]
+
+      response.status shouldBe 200
+      res.size        shouldBe 1
+      res.forall(obj => (obj \ "owningTeams").as[Seq[String]].contains(team))
+      res.head        shouldBe Json.parse(
+        """
+          |{
+          |  "name": "repo-7",
+          |  "description": "service",
+          |  "url": "https://github.com/hmrc/repo-7",
+          |  "createdDate": "2014-03-11T19:59:49Z",
+          |  "lastActiveDate": "2020-12-03T12:57:55Z",
+          |  "isPrivate": false,
+          |  "repoType": "Service",
+          |  "serviceType": "backend",
+          |  "tags": [
+          |    "api"
+          |  ],
+          |  "digitalServiceName": "",
+          |  "owningTeams": [
+          |    "TestTeam"
+          |  ],
+          |  "language": "Scala",
+          |  "isArchived": false,
+          |  "defaultBranch": "main",
+          |  "isDeprecated": false,
+          |  "teamNames": [
+          |    "TestTeam"
+          |  ]
+          |}
+          |""".stripMargin
+      )
+    }
+
+    "return archived repositories that are backend services with the api tag" in {
+      val response = wsClient
+        .url(s"$baseUrl/api/v2/repositories?archived=true&repoType=Service&serviceType=backend&tag=api")
+        .get()
+        .futureValue
+
+      val res = response.json.as[Seq[JsObject]]
+
+      response.status shouldBe 200
+      res.size        shouldBe 1
+      res.head        shouldBe Json.parse(
+        """
+          |{
+          |  "name": "repo-1",
+          |  "description": "archived",
+          |  "url": "https://github.com/hmrc/repo-1",
+          |  "createdDate": "2014-03-11T19:59:49Z",
+          |  "lastActiveDate": "2020-12-03T12:57:55Z",
+          |  "isPrivate": false,
+          |  "repoType": "Service",
+          |  "serviceType": "backend",
+          |  "tags": [
+          |    "api"
+          |  ],
+          |  "owningTeams": [
+          |    "PlatOps"
+          |  ],
+          |  "language": "Scala",
+          |  "isArchived": true,
+          |  "defaultBranch": "main",
+          |  "isDeprecated": true,
+          |  "teamNames": [
+          |    "PlatOps"
+          |  ]
+          |}
+          |""".stripMargin
+      )
+    }
+  }
+
   "GET /api/v2/decommissioned-repositories" should {
     "return a list of all decommissioned repositories" in {
       val response = wsClient
@@ -82,7 +254,8 @@ class ApiControllerISpec
 
       response.status shouldBe 200
       response.json   shouldBe Json.parse(
-        """[
+        """
+          |[
           |  {
           |    "name": "Team A",
           |    "lastActiveDate": "2024-05-08T16:24:37Z",
@@ -95,7 +268,121 @@ class ApiControllerISpec
           |    "name": "Team B",
           |    "repos": []
           |  }
+          |]
+          |""".stripMargin
+      )
+    }
+  }
+
+  "GET /api/teams_with_repositories" should {
+    "return a list of teams and their repositories" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/api/teams_with_repositories")
+          .get()
+          .futureValue
+
+      val expectedJson       = Json.parse(fromResource("teamRepositories.json"))
+
+      val actualNames        = (response.json \\ "name").map(_.as[String])
+      val expectedNames      = (expectedJson  \\ "name").map(_.as[String])
+
+      val actualRepos        = (response.json \\ "repos").map(_.as[JsObject])
+      val expectedRepos      = (expectedJson  \\ "repos").map(_.as[JsObject])
+
+      val actualOwnedRepos   = (response.json \\ "ownedRepos").map(_.as[Seq[String]])
+      val expectedOwnedRepos = (response.json \\ "ownedRepos").map(_.as[Seq[String]])
+
+       response.status shouldBe 200
+       actualRepos     shouldBe expectedRepos
+
+       actualNames      should contain theSameElementsAs expectedNames
+       actualOwnedRepos should contain theSameElementsAs expectedOwnedRepos
+
+
+//      response.json   shouldBe Json.parse(fromResource("teamRepositories.json"))
+    }
+  }
+
+  "GET /api/repositories/:name" should {
+    "return repository details for a repo name" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/api/repositories/repo-2")
+          .get()
+          .futureValue
+
+      response.status shouldBe 200
+      response.json   shouldBe Json.parse(fromResource("repositoryDetails.json"))
+    }
+  }
+
+  "GET /api/repositories" should {
+    "return all repositories" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/api/repositories")
+          .get()
+          .futureValue
+
+      response.status shouldBe 200
+      response.json   shouldBe Json.parse(fromResource("repositories.json"))
+    }
+
+    "return only archived repositories" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/api/repositories?archived=true")
+          .get()
+          .futureValue
+
+      response.status shouldBe 200
+      response.json   shouldBe Json.parse(
+        """[
+          |  {
+          |    "name": "repo-1",
+          |    "teamNames": [
+          |      "PlatOps"
+          |    ],
+          |    "createdAt": "2014-03-11T19:59:49Z",
+          |    "lastUpdatedAt": "2020-12-03T12:57:55Z",
+          |    "repoType": "Service",
+          |    "language": "Scala",
+          |    "isArchived": true,
+          |    "defaultBranch": "main",
+          |    "isDeprecated": true
+          |  }
           |]""".stripMargin
+      )
+    }
+
+    "return only non-archived repositories" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/api/repositories?archived=false")
+          .get()
+          .futureValue
+
+      response.status shouldBe 200
+
+      val res = response.json.as[Seq[JsObject]]
+      res.size shouldBe 6
+      res.forall(obj => (obj \ "isArchived").as[Boolean]) shouldBe false
+      res.head shouldBe Json.parse(
+        """{
+          |  "name": "repo-2",
+          |  "teamNames": [
+          |    "PlatOps"
+          |  ],
+          |  "createdAt": "2014-03-11T19:59:49Z",
+          |  "lastUpdatedAt": "2020-12-03T12:57:55Z",
+          |  "repoType": "Service",
+          |  "language": "Scala",
+          |  "isArchived": false,
+          |  "defaultBranch": "main",
+          |  "isDeprecated": false
+          |}
+          |""".stripMargin
       )
     }
   }
@@ -109,7 +396,7 @@ class ApiControllerISpec
           .futureValue
 
       response.status shouldBe 200
-      response.json shouldBe Json.parse(fromResource("whatsRunningWhere.json"))
+      response.json   shouldBe Json.parse(fromResource("whatsRunningWhere.json"))
     }
   }
 
@@ -137,7 +424,7 @@ class ApiControllerISpec
   }
 
   private def fromResource(resource: String): String = {
-    val resourcePath = s"it/resources/verifyEndPointJson/$resource"
+    val resourcePath = s"it/resources/expectedJson/$resource"
     Option(new File(System.getProperty("user.dir"), resourcePath))
       .fold(
         sys.error(s"Could not find resource at $resourcePath")

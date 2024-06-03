@@ -31,7 +31,7 @@ class ApiController @Inject()(
   apiConnector  : ApiConnector,
   servicesConfig: ServicesConfig,
   cc            : ControllerComponents
-  ) extends BackendController(cc) {
+) extends BackendController(cc) {
 
   private val prCommenterUrl           = servicesConfig.baseUrl("pr-commenter")
   private val teamsAndRepositoriesUrl  = servicesConfig.baseUrl("teams-and-repositories")
@@ -51,9 +51,47 @@ class ApiController @Inject()(
       apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/decommissioned-repositories?repoType=$repoType")
     }
 
+  def repositoriesV2(
+    name       : Option[String],
+    team       : Option[String],
+    owningTeam : Option[String],
+    archived   : Option[Boolean],
+    repoType   : Option[String],
+    serviceType: Option[String],
+    tag        : Option[List[String]]
+  ) = Action.async { implicit request =>
+
+    val queryParams = Seq(
+      name.map("name" -> _)
+    , team.map("team" -> _)
+    , owningTeam.map("owningTeam" -> _)
+    , archived.map("archived" -> _.toString)
+    , repoType.map("repoType" -> _)
+    , serviceType.map("serviceType" -> _)
+    ).flatten ++
+      tag.getOrElse(Seq.empty).map("tag" -> _)
+
+    apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/repositories?$queryParams")
+  }
+
   def teams() =
     Action.async { implicit request =>
       apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/teams")
+    }
+
+  def teamsWithRepos() =
+    Action.async { implicit request =>
+      apiConnector.get(url"$teamsAndRepositoriesUrl/api/teams_with_repositories")
+    }
+
+  def repositoryDetails(name: String) =
+    Action.async { implicit  request =>
+      apiConnector.get(url"$teamsAndRepositoriesUrl/api/repositories/$name")
+    }
+
+  def repositories(archived: Option[Boolean]) =
+    Action.async { implicit  request =>
+      apiConnector.get(url"$teamsAndRepositoriesUrl/api/repositories?archived=$archived")
     }
 
   def whatsRunningWhere() =
