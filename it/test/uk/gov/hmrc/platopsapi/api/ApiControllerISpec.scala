@@ -38,7 +38,7 @@ class ApiControllerISpec
     with GuiceOneServerPerSuite {
 
   private val wsClient = app.injector.instanceOf[WSClient]
-  private val baseUrl  = s"http://localhost:$port"
+  private val baseUrl  = s"http://localhost:$port/api"
 
   override def beforeAll(): Unit = {
      TestStubs.resetAll()
@@ -48,7 +48,7 @@ class ApiControllerISpec
   "GET /api/v2/repositories" should {
     "return a list of all repositories" in {
       val response = wsClient
-        .url(s"$baseUrl/api/v2/repositories")
+        .url(s"$baseUrl/v2/repositories")
         .get()
         .futureValue
 
@@ -58,7 +58,7 @@ class ApiControllerISpec
 
     "return a repository by name" in {
       val response = wsClient
-        .url(s"$baseUrl/api/v2/repositories?name=repo-7")
+        .url(s"$baseUrl/v2/repositories?name=repo-7")
         .get()
         .futureValue
 
@@ -97,7 +97,7 @@ class ApiControllerISpec
     "return list of repositories associated with a team" in {
       val team     = "PlatOps"
       val response = wsClient
-        .url(s"$baseUrl/api/v2/repositories?team=$team")
+        .url(s"$baseUrl/v2/repositories?team=$team")
         .get()
         .futureValue
 
@@ -138,7 +138,7 @@ class ApiControllerISpec
     "return list of repositories by an owning team" in {
       val team = "TestTeam"
       val response = wsClient
-        .url(s"$baseUrl/api/v2/repositories?owningTeam=$team")
+        .url(s"$baseUrl/v2/repositories?owningTeam=$team")
         .get()
         .futureValue
 
@@ -179,7 +179,7 @@ class ApiControllerISpec
 
     "return archived repositories that are backend services with the api tag" in {
       val response = wsClient
-        .url(s"$baseUrl/api/v2/repositories?archived=true&repoType=Service&serviceType=backend&tag=api")
+        .url(s"$baseUrl/v2/repositories?archived=true&repoType=Service&serviceType=backend&tag=api")
         .get()
         .futureValue
 
@@ -220,7 +220,7 @@ class ApiControllerISpec
   "GET /api/v2/decommissioned-repositories" should {
     "return a list of all decommissioned repositories" in {
       val response = wsClient
-        .url(s"$baseUrl/api/v2/decommissioned-repositories")
+        .url(s"$baseUrl/v2/decommissioned-repositories")
         .get()
         .futureValue
 
@@ -233,7 +233,7 @@ class ApiControllerISpec
     "return a list of decommissioned services" in {
       val response =
         wsClient
-          .url(s"$baseUrl/api/v2/decommissioned-repositories?repoType=Service")
+          .url(s"$baseUrl/v2/decommissioned-repositories?repoType=Service")
           .get()
           .futureValue
 
@@ -248,7 +248,7 @@ class ApiControllerISpec
     "return a list of team summaries" in {
       val response =
         wsClient
-          .url(s"$baseUrl/api/v2/teams")
+          .url(s"$baseUrl/v2/teams")
           .get()
           .futureValue
 
@@ -278,7 +278,7 @@ class ApiControllerISpec
     "return a list of teams and their repositories" in {
       val response =
         wsClient
-          .url(s"$baseUrl/api/teams_with_repositories")
+          .url(s"$baseUrl/teams_with_repositories")
           .get()
           .futureValue
 
@@ -293,11 +293,10 @@ class ApiControllerISpec
       val actualOwnedRepos   = (response.json \\ "ownedRepos").map(_.as[Seq[String]])
       val expectedOwnedRepos = (response.json \\ "ownedRepos").map(_.as[Seq[String]])
 
-       response.status shouldBe 200
-       actualRepos     shouldBe expectedRepos
-
-       actualNames      should contain theSameElementsAs expectedNames
-       actualOwnedRepos should contain theSameElementsAs expectedOwnedRepos
+      response.status  shouldBe 200
+      actualRepos      shouldBe expectedRepos
+      actualNames      should contain theSameElementsAs expectedNames
+      actualOwnedRepos should contain theSameElementsAs expectedOwnedRepos
 
 
 //      response.json   shouldBe Json.parse(fromResource("teamRepositories.json"))
@@ -308,7 +307,7 @@ class ApiControllerISpec
     "return repository details for a repo name" in {
       val response =
         wsClient
-          .url(s"$baseUrl/api/repositories/repo-2")
+          .url(s"$baseUrl/repositories/repo-2")
           .get()
           .futureValue
 
@@ -321,7 +320,7 @@ class ApiControllerISpec
     "return all repositories" in {
       val response =
         wsClient
-          .url(s"$baseUrl/api/repositories")
+          .url(s"$baseUrl/repositories")
           .get()
           .futureValue
 
@@ -332,7 +331,7 @@ class ApiControllerISpec
     "return only archived repositories" in {
       val response =
         wsClient
-          .url(s"$baseUrl/api/repositories?archived=true")
+          .url(s"$baseUrl/repositories?archived=true")
           .get()
           .futureValue
 
@@ -359,7 +358,7 @@ class ApiControllerISpec
     "return only non-archived repositories" in {
       val response =
         wsClient
-          .url(s"$baseUrl/api/repositories?archived=false")
+          .url(s"$baseUrl/repositories?archived=false")
           .get()
           .futureValue
 
@@ -391,7 +390,7 @@ class ApiControllerISpec
     "return a list of what's running where data" in {
       val response =
         wsClient
-          .url(s"$baseUrl/api/whats-running-where")
+          .url(s"$baseUrl/whats-running-where")
           .get()
           .futureValue
 
@@ -404,7 +403,7 @@ class ApiControllerISpec
     "return what's running where data for a single service" in {
       val response =
         wsClient
-          .url(s"$baseUrl/api/whats-running-where/catalogue-frontend")
+          .url(s"$baseUrl/whats-running-where/catalogue-frontend")
           .get()
           .futureValue
 
@@ -420,6 +419,77 @@ class ApiControllerISpec
       actualName      shouldBe expectedName
 
       actualVersions should contain theSameElementsAs expectedVersions
+    }
+  }
+
+  "POST /api/v2/notifications" should {
+    val body =
+      """
+        |{
+        |  "displayName": "test",
+        |  "emoji": ":see_no_evil:",
+        |  "text": "test",
+        |  "channelLookup": {
+        |    "by": "github-team",
+        |    "teamName": "platops"
+        |  },
+        |  "blocks": [
+        |    {
+        |      "type": "section",
+        |      "text": {
+        |        "type": "mrkdwn",
+        |        "text": "Testing API"
+        |      }
+        |    }
+        |  ]
+        |}
+        |""".stripMargin
+
+    "return msgId when the slack notification json sent is valid" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/v2/notification")
+          .withHttpHeaders("Content-Type" -> "application/json", "Authorization" -> "token")
+          .post(body)
+          .futureValue
+
+      response.status                          shouldBe 202
+      (response.json \ "msgId").asOpt[JsValue] shouldBe defined
+    }
+
+    "return 400 when the slack notification json sent is invalid" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/v2/notification")
+          .withHttpHeaders("Content-Type" -> "application/json", "Authorization" -> "token")
+          .post("""{}""")
+          .futureValue
+
+      response.status shouldBe 400
+    }
+
+    "return 401 when requesting client is unauthorised" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/v2/notification")
+          .withHttpHeaders("Content-Type" -> "application/json", "Authorization" -> "no-token")
+          .post(body)
+          .futureValue
+
+      response.status shouldBe 401
+      response.json   shouldBe Json.parse("""{"statusCode":401,"message":"Unauthorized"}""")
+    }
+
+    "return 403 when requesting client is authorised but does not have the correct permissions" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/v2/notification")
+          .withHttpHeaders("Content-Type" -> "application/json", "Authorization" -> "no-permissions")
+          .post(body)
+          .futureValue
+
+      response.status shouldBe 403
+      response.json   shouldBe Json.parse("""{"statusCode":403,"message":"Forbidden"}""")
     }
   }
 

@@ -36,6 +36,7 @@ class ApiController @Inject()(
   private val prCommenterUrl           = servicesConfig.baseUrl("pr-commenter")
   private val teamsAndRepositoriesUrl  = servicesConfig.baseUrl("teams-and-repositories")
   private val releasesApiUrl           = servicesConfig.baseUrl("releases-api")
+  private val slackNotificationsUrl    = servicesConfig.baseUrl("slack-notifications")
 
   private def streamParser: BodyParser[Source[ByteString, _]] = BodyParser { _ =>
     Accumulator.source[ByteString].map(Right.apply)(cc.executionContext)
@@ -102,5 +103,15 @@ class ApiController @Inject()(
   def whatsRunningWhereForService(serviceName: String) =
     Action.async { implicit request =>
       apiConnector.get(url"$releasesApiUrl/releases-api/whats-running-where/$serviceName")
+    }
+
+  def sendLegacySlackNotification() =
+    Action.async(parse.json) { implicit  request =>
+      apiConnector.post(url"$slackNotificationsUrl/slack-notifications/notification", request.body)
+    }
+
+  def sendSlackNotification() =
+    Action.async(parse.json) { implicit  request =>
+      apiConnector.post(url"$slackNotificationsUrl/slack-notifications/v2/notification", request.body)
     }
 }

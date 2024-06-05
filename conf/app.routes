@@ -16,3 +16,7 @@ GET  /v2/decommissioned-repositories                           uk.gov.hmrc.plato
 # Releases
 GET  /whats-running-where                                      uk.gov.hmrc.platopsapi.api.ApiController.whatsRunningWhere()
 GET  /whats-running-where/:serviceName                         uk.gov.hmrc.platopsapi.api.ApiController.whatsRunningWhereForService(serviceName: String)
+
+# Slack Notifictions
+POST /notification                                             uk.gov.hmrc.platopsapi.api.ApiController.sendLegacySlackNotification()
+POST /v2/notification                                          uk.gov.hmrc.platopsapi.api.ApiController.sendSlackNotification()
