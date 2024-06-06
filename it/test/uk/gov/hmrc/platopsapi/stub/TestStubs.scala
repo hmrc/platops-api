@@ -15,7 +15,6 @@ import scala.io.Source
 import scala.util.Using
 
 object TestStubs {
-  //TODO from config?
   private val teamsAndRepositoriesBaseUrl = "http://localhost:9015"
   private val releasesApiBaseUrl          = "http://localhost:8008"
   private val internalAuthBaseUrl         = "http://localhost:8470"
@@ -71,10 +70,8 @@ object TestStubs {
         delete(gitRepositories).flatMap(_ => post(gitRepositories, fromResource("gitRepositories.json"))),
         put(deletedGitRepositories, fromResource("deletedGitRepositories.json")),
         delete(teamSummaries).flatMap(_ => post(teamSummaries, fromResource("teamSummaries.json"))),
-
         //releases-api
         delete(releaseEvents).flatMap(_ => post(releaseEvents, fromResource("deploymentEvents.json"))),
-
         //slack-notifications
         post(internalAuthToken, fromResource("slackNotificationsToken.json")),
         post(internalAuthToken, fromResource("slackNotificationsTokenNoPermissions.json"))

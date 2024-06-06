@@ -1,12 +1,40 @@
 [
   {
+    "deployer_name"                  : "deploy-with-docktor",
+    "cloudformation_template_version": "v0.0.79",
+    "microservice"                   : "catalogue-frontend",
+    "mdtp_zone"                      : "protected",
+    "microservice_version"           : "4.254.0",
+    "lambda_version"                 : "v0.1.269",
+    "lambda_name"                    : "ecs-mdtp-deployer-protected",
+    "deployer_principal"             : "jenkins-orchestrator",
+    "deployer_version"               : "0.186.0",
+    "slug_uri"                       : "https://webstore.tax.service.gov.uk/slugs/catalogue-frontend/catalogue-frontend_0.82.0_0.5.2.tgz",
+    "event_type"                     : "deployment-in-progress",
+    "event_date_time"                : "1969-12-28T00:00:00.000Z",
+    "stack_id"                       : "0",
+    "environment"                    : "development",
+    "config.0.repoName"              : "app-config-common",
+    "config.0.gitSha"                : "1234",
+    "config.0.fileName"              : "development-microservice-common.yaml",
+    "config.1.repoName"              : "app-config-development",
+    "config.1.gitSha"                : "5678",
+    "config.1.fileName"              : "catalogue-frontend.yaml"
+  },
+  {
     "stack_id"            : "0",
     "event_type"          : "deployment-complete",
     "microservice_version": "4.254.0",
     "event_date_time"     : "1969-12-28T00:00:00.000Z",
     "microservice"        : "catalogue-frontend",
     "environment"         : "development",
-    "deployer_principal"  : "jenkins-orchestrator"
+    "deployer_principal"  : "jenkins-orchestrator",
+    "config.0.repoName"   : "app-config-common",
+    "config.0.gitSha"     : "1234",
+    "config.0.fileName"   : "development-microservice-common.yaml",
+    "config.1.repoName"   : "app-config-development",
+    "config.1.gitSha"     : "5678",
+    "config.1.fileName"   : "catalogue-frontend.yaml"
   },
   {
     "stack_id"            : "1",
@@ -15,7 +43,13 @@
     "event_date_time"     : "1969-12-28T00:00:00.000Z",
     "microservice"        : "catalogue-frontend",
     "environment"         : "staging",
-    "deployer_principal"  : "jenkins-orchestrator"
+    "deployer_principal"  : "jenkins-orchestrator",
+    "config.0.repoName"   : "app-config-common",
+    "config.0.gitSha"     : "1234",
+    "config.0.fileName"   : "staging-microservice-common.yaml",
+    "config.1.repoName"   : "app-config-staging",
+    "config.1.gitSha"     : "5678",
+    "config.1.fileName"   : "catalogue-frontend.yaml"
   },
   {
     "stack_id"            : "2",
@@ -24,7 +58,13 @@
     "event_date_time"     : "2020-06-11T15:22:00.000Z",
     "microservice"        : "catalogue-frontend",
     "environment"         : "qa",
-    "deployer_principal"  : "joe.bloggs"
+    "deployer_principal"  : "joe.bloggs",
+    "config.0.repoName"   : "app-config-common",
+    "config.0.gitSha"     : "1234",
+    "config.0.fileName"   : "qa-microservice-common.yaml",
+    "config.1.repoName"   : "app-config-qa",
+    "config.1.gitSha"     : "5678",
+    "config.1.fileName"   : "catalogue-frontend.yaml"
   },
   {
     "stack_id"            : "3",
@@ -33,7 +73,13 @@
     "event_date_time"     : "2020-06-11T15:22:00.000Z",
     "microservice"        : "catalogue-frontend",
     "environment"         : "externaltest",
-    "deployer_principal"  : "joe.bloggs"
+    "deployer_principal"  : "joe.bloggs",
+    "config.0.repoName"   : "app-config-common",
+    "config.0.gitSha"     : "1234",
+    "config.0.fileName"   : "externaltest-microservice-common.yaml",
+    "config.1.repoName"   : "app-config-externaltest",
+    "config.1.gitSha"     : "5678",
+    "config.1.fileName"   : "catalogue-frontend.yaml"
   },
   {
     "stack_id"            : "4",
@@ -42,7 +88,13 @@
     "event_date_time"     : "2020-06-11T15:22:00.000Z",
     "microservice"        : "catalogue-frontend",
     "environment"         : "production",
-    "deployer_principal"  : "joe.bloggs"
+    "deployer_principal"  : "joe.bloggs",
+    "config.0.repoName"   : "app-config-common",
+    "config.0.gitSha"     : "1234",
+    "config.0.fileName"   : "production-microservice-common.yaml",
+    "config.1.repoName"   : "app-config-production",
+    "config.1.gitSha"     : "5678",
+    "config.1.fileName"   : "catalogue-frontend.yaml"
   },
   {
     "stack_id"            : "5",
@@ -51,7 +103,13 @@
     "event_date_time"     : "1969-12-28T00:00:00.000Z",
     "microservice"        : "play-authorisation",
     "environment"         : "staging",
-    "deployer_principal"  : "jenkins-orchestrator"
+    "deployer_principal"  : "jenkins-orchestrator",
+    "config.0.repoName"   : "app-config-common",
+    "config.0.gitSha"     : "1234",
+    "config.0.fileName"   : "staging-microservice-common.yaml",
+    "config.1.repoName"   : "app-config-staging",
+    "config.1.gitSha"     : "5678",
+    "config.1.fileName"   : "play-authorisation.yaml"
   },
   {
     "stack_id"            : "6",
@@ -60,7 +118,13 @@
     "event_date_time"     : "1969-12-28T00:00:00.000Z",
     "microservice"        : "play-authorisation",
     "environment"         : "production",
-    "deployer_principal"  : "jenkins-orchestrator"
+    "deployer_principal"  : "jenkins-orchestrator",
+    "config.0.repoName"   : "app-config-common",
+    "config.0.gitSha"     : "1234",
+    "config.0.fileName"   : "production-microservice-common.yaml",
+    "config.1.repoName"   : "app-config-production",
+    "config.1.gitSha"     : "5678",
+    "config.1.fileName"   : "play-authorisation.yaml"
   },
   {
     "stack_id"            : "7",
@@ -69,7 +133,13 @@
     "event_date_time"     : "1969-12-28T00:00:00.000Z",
     "microservice"        : "service-dependencies",
     "environment"         : "staging",
-    "deployer_principal"  : "jenkins-orchestrator"
+    "deployer_principal"  : "jenkins-orchestrator",
+    "config.0.repoName"   : "app-config-common",
+    "config.0.gitSha"     : "1234",
+    "config.0.fileName"   : "staging-microservice-common.yaml",
+    "config.1.repoName"   : "app-config-staging",
+    "config.1.gitSha"     : "5678",
+    "config.1.fileName"   : "service-dependencies.yaml"
   },
   {
     "stack_id"            : "8",
@@ -78,7 +148,13 @@
     "event_date_time"     : "1969-12-28T00:00:00.000Z",
     "microservice"        : "service-dependencies",
     "environment"         : "production",
-    "deployer_principal"  : "jenkins-orchestrator"
+    "deployer_principal"  : "jenkins-orchestrator",
+    "config.0.repoName"   : "app-config-common",
+    "config.0.gitSha"     : "1234",
+    "config.0.fileName"   : "production-microservice-common.yaml",
+    "config.1.repoName"   : "app-config-production",
+    "config.1.gitSha"     : "5678",
+    "config.1.fileName"   : "service-dependencies.yaml"
   },
   {
     "stack_id"            : "9",
@@ -87,7 +163,13 @@
     "event_date_time"     : "2020-06-09T14:18:24.000Z",
     "microservice"        : "user-details",
     "environment"         : "staging",
-    "deployer_principal"  : "joe.bloggs"
+    "deployer_principal"  : "joe.bloggs",
+    "config.0.repoName"   : "app-config-common",
+    "config.0.gitSha"     : "1234",
+    "config.0.fileName"   : "staging-microservice-common.yaml",
+    "config.1.repoName"   : "app-config-staging",
+    "config.1.gitSha"     : "5678",
+    "config.1.fileName"   : "user-details.yaml"
   },
   {
     "stack_id"            : "10",
@@ -96,6 +178,12 @@
     "event_date_time"     : "2020-06-09T14:18:24.000Z",
     "microservice"        : "user-details",
     "environment"         : "production",
-    "deployer_principal"  : "joe.bloggs"
+    "deployer_principal"  : "joe.bloggs",
+    "config.0.repoName"   : "app-config-common",
+    "config.0.gitSha"     : "1234",
+    "config.0.fileName"   : "production-microservice-common.yaml",
+    "config.1.repoName"   : "app-config-production",
+    "config.1.gitSha"     : "5678",
+    "config.1.fileName"   : "user-details.yaml"
   }
 ]

@@ -282,24 +282,8 @@ class ApiControllerISpec
           .get()
           .futureValue
 
-      val expectedJson       = Json.parse(fromResource("teamRepositories.json"))
-
-      val actualNames        = (response.json \\ "name").map(_.as[String])
-      val expectedNames      = (expectedJson  \\ "name").map(_.as[String])
-
-      val actualRepos        = (response.json \\ "repos").map(_.as[JsObject])
-      val expectedRepos      = (expectedJson  \\ "repos").map(_.as[JsObject])
-
-      val actualOwnedRepos   = (response.json \\ "ownedRepos").map(_.as[Seq[String]])
-      val expectedOwnedRepos = (response.json \\ "ownedRepos").map(_.as[Seq[String]])
-
-      response.status  shouldBe 200
-      actualRepos      shouldBe expectedRepos
-      actualNames      should contain theSameElementsAs expectedNames
-      actualOwnedRepos should contain theSameElementsAs expectedOwnedRepos
-
-
-//      response.json   shouldBe Json.parse(fromResource("teamRepositories.json"))
+      response.status shouldBe 200
+      response.json   shouldBe Json.parse(fromResource("teamRepositories.json"))
     }
   }
 
@@ -407,18 +391,8 @@ class ApiControllerISpec
           .get()
           .futureValue
 
-      val expectedJson     = Json.parse(fromResource("whatsRunningWhereForService.json"))
-
-      val actualName       = (response.json \ "applicationName").as[String]
-      val expectedName     = (expectedJson  \ "applicationName").as[String]
-
-      val actualVersions   = (response.json \ "versions").as[Seq[JsObject]]
-      val expectedVersions = (expectedJson  \ "versions").as[Seq[JsObject]]
-
       response.status shouldBe 200
-      actualName      shouldBe expectedName
-
-      actualVersions should contain theSameElementsAs expectedVersions
+      response.json   shouldBe Json.parse(fromResource("whatsRunningWhereForService.json"))
     }
   }
 
