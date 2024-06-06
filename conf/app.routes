@@ -20,3 +20,4 @@ GET      /whats-running-where/:serviceName                         uk.gov.hmrc.p
 # Slack Notifictions
 POST     /notification                                             uk.gov.hmrc.platopsapi.api.ApiController.sendLegacySlackNotification()
 POST     /v2/notification                                          uk.gov.hmrc.platopsapi.api.ApiController.sendSlackNotification()
+GET      /v2/:msgId/status                                         uk.gov.hmrc.platopsapi.api.ApiController.status(msgId: String)

@@ -136,7 +136,7 @@ class ApiControllerISpec
     }
 
     "return list of repositories by an owning team" in {
-      val team = "TestTeam"
+      val team     = "TestTeam"
       val response = wsClient
         .url(s"$baseUrl/v2/repositories?owningTeam=$team")
         .get()
@@ -397,34 +397,12 @@ class ApiControllerISpec
   }
 
   "POST /api/v2/notifications" should {
-    val body =
-      """
-        |{
-        |  "displayName": "test",
-        |  "emoji": ":see_no_evil:",
-        |  "text": "test",
-        |  "channelLookup": {
-        |    "by": "github-team",
-        |    "teamName": "platops"
-        |  },
-        |  "blocks": [
-        |    {
-        |      "type": "section",
-        |      "text": {
-        |        "type": "mrkdwn",
-        |        "text": "Testing API"
-        |      }
-        |    }
-        |  ]
-        |}
-        |""".stripMargin
-
     "return msgId when the slack notification json sent is valid" in {
       val response =
         wsClient
           .url(s"$baseUrl/v2/notification")
           .withHttpHeaders("Content-Type" -> "application/json", "Authorization" -> "token")
-          .post(body)
+          .post(slackMessageBody)
           .futureValue
 
       response.status                          shouldBe 202
@@ -447,7 +425,7 @@ class ApiControllerISpec
         wsClient
           .url(s"$baseUrl/v2/notification")
           .withHttpHeaders("Content-Type" -> "application/json", "Authorization" -> "no-token")
-          .post(body)
+          .post(slackMessageBody)
           .futureValue
 
       response.status shouldBe 401
@@ -459,11 +437,48 @@ class ApiControllerISpec
         wsClient
           .url(s"$baseUrl/v2/notification")
           .withHttpHeaders("Content-Type" -> "application/json", "Authorization" -> "no-permissions")
-          .post(body)
+          .post(slackMessageBody)
           .futureValue
 
       response.status shouldBe 403
       response.json   shouldBe Json.parse("""{"statusCode":403,"message":"Forbidden"}""")
+    }
+  }
+
+  "GET /api/v2/:msgId/status" should {
+    def sendSlackMessageResponse() = {
+      val response = wsClient
+        .url(s"$baseUrl/v2/notification")
+        .withHttpHeaders("Content-Type" -> "application/json", "Authorization" -> "token")
+        .post(slackMessageBody)
+        .futureValue
+
+      (response.json \ "msgId").as[String]
+    }
+
+    def getStatus(msgId: String, authToken: String) =
+      wsClient
+        .url(s"$baseUrl/v2/$msgId/status")
+        .withHttpHeaders("Authorization" -> authToken)
+        .get()
+        .futureValue
+
+    "return 200 for valid message id in status request" in {
+      val msgId          = sendSlackMessageResponse()
+      val statusResponse = getStatus(msgId, "token")
+      statusResponse.status shouldBe 200
+    }
+
+    "return 401 when requesting client is unauthorised" in {
+      val msgId          = sendSlackMessageResponse()
+      val statusResponse = getStatus(msgId, "no-token")
+      statusResponse.status shouldBe 401
+    }
+
+    "return 403 when requesting client is authorised but does not have the correct permissions" in {
+      val msgId          = sendSlackMessageResponse()
+      val statusResponse = getStatus(msgId, "no-permissions")
+      statusResponse.status shouldBe 403
     }
   }
 
@@ -481,4 +496,26 @@ class ApiControllerISpec
           }
       )
   }
+
+  private val slackMessageBody =
+    """
+      |{
+      |  "displayName": "test",
+      |  "emoji": ":see_no_evil:",
+      |  "text": "test",
+      |  "channelLookup": {
+      |    "by": "github-team",
+      |    "teamName": "platops"
+      |  },
+      |  "blocks": [
+      |    {
+      |      "type": "section",
+      |      "text": {
+      |        "type": "mrkdwn",
+      |        "text": "Testing API"
+      |      }
+      |    }
+      |  ]
+      |}
+      |""".stripMargin
 }

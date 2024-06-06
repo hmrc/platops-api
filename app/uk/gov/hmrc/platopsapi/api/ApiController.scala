@@ -24,6 +24,7 @@ import uk.gov.hmrc.http.StringContextOps
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import java.util.UUID
 import javax.inject.{Inject, Singleton}
 
 @Singleton()
@@ -113,5 +114,10 @@ class ApiController @Inject()(
   def sendSlackNotification() =
     Action.async(parse.json) { implicit  request =>
       apiConnector.post(url"$slackNotificationsUrl/slack-notifications/v2/notification", request.body)
+    }
+
+  def status(msgId: String) =
+    Action.async { implicit request =>
+      apiConnector.get(url"$slackNotificationsUrl/slack-notifications/v2/$msgId/status")
     }
 }
