@@ -24,7 +24,6 @@ import uk.gov.hmrc.http.StringContextOps
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import java.util.UUID
 import javax.inject.{Inject, Singleton}
 
 @Singleton()
