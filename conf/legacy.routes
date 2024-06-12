@@ -1,0 +1,8 @@
+# Releases
+GET      /whats-running-where                         uk.gov.hmrc.platopsapi.legacy.LegacyController.redirectWhatsRunningWhere()
+GET      /whats-running-where/:serviceName            uk.gov.hmrc.platopsapi.legacy.LegacyController.redirectWhatsRunningWhereForService(serviceName: String)
+
+# Slack Notifications
+POST     /notification                                uk.gov.hmrc.platopsapi.legacy.LegacyController.sendLegacySlackNotification()
+POST     /v2/notification                             uk.gov.hmrc.platopsapi.legacy.LegacyController.sendSlackNotification()
+GET      /v2/:msgId/status                            uk.gov.hmrc.platopsapi.legacy.LegacyController.slackNotificationStatus(msgId: String)

@@ -14,36 +14,27 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.platopsapi.api
+package uk.gov.hmrc.platopsapi
 
-import org.scalatest.BeforeAndAfterAll
+import org.scalatest.DoNotDiscover
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json._
 import play.api.libs.ws.WSClient
-import uk.gov.hmrc.platopsapi.stub.TestStubs
 
-import java.io.File
-import scala.io.Source
-import scala.util.Using
-
+@DoNotDiscover
 class ApiControllerISpec
   extends AnyWordSpec
-    with BeforeAndAfterAll
     with Matchers
     with ScalaFutures
     with IntegrationPatience
     with GuiceOneServerPerSuite {
 
-  private val wsClient = app.injector.instanceOf[WSClient]
-  private val baseUrl  = s"http://localhost:$port"
-
-  override def beforeAll(): Unit = {
-     TestStubs.resetAll()
-     super.beforeAll()
-  }
+  private val wsClient     = app.injector.instanceOf[WSClient]
+  private val baseUrl      = s"http://localhost:$port"
+  private val expectedJson = ResourceUtil("it/resources/expectedJson")
 
   "GET /api/v2/repositories" should {
     "return a list of all repositories" in {
@@ -53,7 +44,7 @@ class ApiControllerISpec
         .futureValue
 
       response.status shouldBe 200
-      response.json   shouldBe Json.parse(fromResource("repositoriesV2.json"))
+      response.json   shouldBe Json.parse(expectedJson.fromResource("repositoriesV2.json"))
     }
 
     "return a repository by name" in {
@@ -283,7 +274,7 @@ class ApiControllerISpec
           .futureValue
 
       response.status shouldBe 200
-      response.json   shouldBe Json.parse(fromResource("teamRepositories.json"))
+      response.json   shouldBe Json.parse(expectedJson.fromResource("teamRepositories.json"))
     }
   }
 
@@ -296,7 +287,7 @@ class ApiControllerISpec
           .futureValue
 
       response.status shouldBe 200
-      response.json   shouldBe Json.parse(fromResource("repositoryDetails.json"))
+      response.json   shouldBe Json.parse(expectedJson.fromResource("repositoryDetails.json"))
     }
   }
 
@@ -309,7 +300,7 @@ class ApiControllerISpec
           .futureValue
 
       response.status shouldBe 200
-      response.json   shouldBe Json.parse(fromResource("repositories.json"))
+      response.json   shouldBe Json.parse(expectedJson.fromResource("repositories.json"))
     }
 
     "return only archived repositories" in {
@@ -379,7 +370,7 @@ class ApiControllerISpec
           .futureValue
 
       response.status shouldBe 200
-      response.json   shouldBe Json.parse(fromResource("whatsRunningWhere.json"))
+      response.json   shouldBe Json.parse(expectedJson.fromResource("whatsRunningWhere.json"))
     }
   }
 
@@ -392,7 +383,7 @@ class ApiControllerISpec
           .futureValue
 
       response.status shouldBe 200
-      response.json   shouldBe Json.parse(fromResource("whatsRunningWhereForService.json"))
+      response.json   shouldBe Json.parse(expectedJson.fromResource("whatsRunningWhereForService.json"))
     }
   }
 
@@ -401,7 +392,7 @@ class ApiControllerISpec
       val response =
         wsClient
           .url(s"$baseUrl/api/v2/notification")
-          .withHttpHeaders("Content-Type" -> "application/json", "Authorization" -> "token")
+          .withHttpHeaders("Authorization" -> "token")
           .post(slackMessageBody)
           .futureValue
 
@@ -413,8 +404,8 @@ class ApiControllerISpec
       val response =
         wsClient
           .url(s"$baseUrl/api/v2/notification")
-          .withHttpHeaders("Content-Type" -> "application/json", "Authorization" -> "token")
-          .post("""{}""")
+          .withHttpHeaders("Authorization" -> "token")
+          .post(Json.parse("""{}"""))
           .futureValue
 
       response.status shouldBe 400
@@ -424,7 +415,7 @@ class ApiControllerISpec
       val response =
         wsClient
           .url(s"$baseUrl/api/v2/notification")
-          .withHttpHeaders("Content-Type" -> "application/json", "Authorization" -> "no-token")
+          .withHttpHeaders("Authorization" -> "no-token")
           .post(slackMessageBody)
           .futureValue
 
@@ -436,7 +427,7 @@ class ApiControllerISpec
       val response =
         wsClient
           .url(s"$baseUrl/api/v2/notification")
-          .withHttpHeaders("Content-Type" -> "application/json", "Authorization" -> "no-permissions")
+          .withHttpHeaders("Authorization" -> "no-permissions")
           .post(slackMessageBody)
           .futureValue
 
@@ -449,7 +440,7 @@ class ApiControllerISpec
     def sendSlackMessageResponse() = {
       val response = wsClient
         .url(s"$baseUrl/api/v2/notification")
-        .withHttpHeaders("Content-Type" -> "application/json", "Authorization" -> "token")
+        .withHttpHeaders("Authorization" -> "token")
         .post(slackMessageBody)
         .futureValue
 
@@ -482,40 +473,27 @@ class ApiControllerISpec
     }
   }
 
-  private def fromResource(resource: String): String = {
-    val resourcePath = s"it/resources/expectedJson/$resource"
-    Option(new File(System.getProperty("user.dir"), resourcePath))
-      .fold(
-        sys.error(s"Could not find resource at $resourcePath")
-      )(
-        resource =>
-          Using(Source.fromFile(resource)) { source =>
-            source.mkString
-          }.getOrElse {
-            sys.error(s"Error reading resource from $resourcePath")
-          }
-      )
-  }
-
   private val slackMessageBody =
-    """
-      |{
-      |  "displayName": "test",
-      |  "emoji": ":see_no_evil:",
-      |  "text": "test",
-      |  "channelLookup": {
-      |    "by": "github-team",
-      |    "teamName": "platops"
-      |  },
-      |  "blocks": [
-      |    {
-      |      "type": "section",
-      |      "text": {
-      |        "type": "mrkdwn",
-      |        "text": "Testing API"
-      |      }
-      |    }
-      |  ]
-      |}
-      |""".stripMargin
+    Json.parse(
+      """
+        |{
+        |  "displayName": "test",
+        |  "emoji": ":see_no_evil:",
+        |  "text": "test",
+        |  "channelLookup": {
+        |    "by": "github-team",
+        |    "teamName": "platops"
+        |  },
+        |  "blocks": [
+        |    {
+        |      "type": "section",
+        |      "text": {
+        |        "type": "mrkdwn",
+        |        "text": "Testing API"
+        |      }
+        |    }
+        |  ]
+        |}
+        |""".stripMargin
+      )
 }

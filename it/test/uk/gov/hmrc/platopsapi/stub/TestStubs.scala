@@ -1,3 +1,19 @@
+/*
+ * Copyright 2024 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package uk.gov.hmrc.platopsapi.stub
 
 import org.apache.pekko.actor.ActorSystem
@@ -6,13 +22,11 @@ import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{Json, Reads, __}
 import play.api.libs.ws.{WSClient, WSClientConfig}
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
+import uk.gov.hmrc.platopsapi.ResourceUtil
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import java.io.File
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, Future}
-import scala.io.Source
-import scala.util.Using
 
 object TestStubs {
   private val teamsAndRepositoriesBaseUrl = "http://localhost:9015"
@@ -63,21 +77,22 @@ object TestStubs {
       .map { response => assert(is2xx(response.status), s"Failed to call stub DELETE $url: ${response.body}"); () }
       .recoverWith { case e => Future.failed(new RuntimeException(s"Failed to call stub DELETE $url: ${e.getMessage}", e)) }
 
-  private def resetServices(): Future[List[Unit]] = {
+  private val seedCollectionsJson = ResourceUtil("it/resources/seedCollectionsJson")
+
+  private def resetServices(): Future[List[Unit]] =
     Future.sequence(
       List(
         //teams-and-repositories
-        delete(gitRepositories).flatMap(_ => post(gitRepositories, fromResource("gitRepositories.json"))),
-        put(deletedGitRepositories, fromResource("deletedGitRepositories.json")),
-        delete(teamSummaries).flatMap(_ => post(teamSummaries, fromResource("teamSummaries.json"))),
+        delete(gitRepositories).flatMap(_ => post(gitRepositories, seedCollectionsJson.fromResource("gitRepositories.json"))),
+        put(deletedGitRepositories, seedCollectionsJson.fromResource("deletedGitRepositories.json")),
+        delete(teamSummaries).flatMap(_ => post(teamSummaries, seedCollectionsJson.fromResource("teamSummaries.json"))),
         //releases-api
-        delete(releaseEvents).flatMap(_ => post(releaseEvents, fromResource("deploymentEvents.json"))),
+        delete(releaseEvents).flatMap(_ => post(releaseEvents, seedCollectionsJson.fromResource("deploymentEvents.json"))),
         //slack-notifications
-        post(internalAuthToken, fromResource("slackNotificationsToken.json")),
-        post(internalAuthToken, fromResource("slackNotificationsTokenNoPermissions.json"))
+        post(internalAuthToken, seedCollectionsJson.fromResource("slackNotificationsToken.json")),
+        post(internalAuthToken, seedCollectionsJson.fromResource("slackNotificationsTokenNoPermissions.json"))
       )
     )
-  }
 
   case class Database(name: String, sizeOnDisk: Long)
 
@@ -116,19 +131,4 @@ object TestStubs {
       } yield ()
       , 2.minutes
     )
-
-  private def fromResource(resource: String): String = {
-    val resourcePath = s"it/resources/seedCollectionsJson/$resource"
-    Option(new File(System.getProperty("user.dir"), resourcePath))
-      .fold(
-        sys.error(s"Could not find resource at $resourcePath")
-      )(
-        resource =>
-          Using(Source.fromFile(resource)) { source =>
-            source.mkString
-          }.getOrElse {
-            sys.error(s"Error reading resource from $resourcePath")
-          }
-      )
-  }
 }

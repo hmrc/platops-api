@@ -3,3 +3,7 @@
 ->         /                          health.Routes
 
 POST       /webhook                   uk.gov.hmrc.platopsapi.webhook.WebhookController.processGithubWebhook()
+
+# Legacy
+->         /releases-api              legacy.Routes
+->         /slack-notifications       legacy.Routes
