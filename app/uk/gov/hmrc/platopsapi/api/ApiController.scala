@@ -115,7 +115,7 @@ class ApiController @Inject()(
       apiConnector.post(url"$slackNotificationsUrl/slack-notifications/v2/notification", request.body)
     }
 
-  def status(msgId: String) =
+  def slackNotificationStatus(msgId: String) =
     Action.async { implicit request =>
       apiConnector.get(url"$slackNotificationsUrl/slack-notifications/v2/$msgId/status")
     }

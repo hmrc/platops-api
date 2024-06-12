@@ -3,3 +3,6 @@
 ->         /                          health.Routes
 
 POST       /webhook                   uk.gov.hmrc.platopsapi.webhook.WebhookController.processGithubWebhook()
+
+# Legacy
+->         /                          legacy.Routes
