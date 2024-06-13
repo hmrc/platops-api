@@ -20,24 +20,29 @@ import java.io.File
 import scala.io.Source
 import scala.util.Using
 
-class ResourceUtil(private val basePath: String) {
-
-  def fromResource(resource: String): String = {
-    val resourcePath = s"$basePath/$resource"
-    Option(new File(System.getProperty("user.dir"), resourcePath))
-      .fold(
-        sys.error(s"Could not find resource at $resourcePath")
-      )(
-        resource =>
-          Using(Source.fromFile(resource)) { source =>
-            source.mkString
-          }.getOrElse {
-            sys.error(s"Error reading resource from $resourcePath")
-          }
-      )
-  }
-}
+//class ResourceUtil(private val basePath: String) {
+//
+//  def fromResource(resource: String): String = {
+//    val resourcePath = s"$basePath/$resource"
+//    Option(new File(System.getProperty("user.dir"), resourcePath))
+//      .fold(
+//        sys.error(s"Could not find resource at $resourcePath")
+//      )(
+//        resource =>
+//          Using(Source.fromFile(resource)) { source =>
+//            source.mkString
+//          }.getOrElse {
+//            sys.error(s"Error reading resource from $resourcePath")
+//          }
+//      )
+//  }
+//}
 
 object ResourceUtil {
-  def apply(basePath: String): ResourceUtil = new ResourceUtil(basePath)
+  //def apply(basePath: String): ResourceUtil = new ResourceUtil(basePath)
+  def fromResource(resourceName: String): String =
+    Option(getClass.getResourceAsStream(resourceName))
+      .fold(
+         sys.error(s"Could not find resource $resourceName on classpath")
+       )(resource => Source.fromInputStream(resource).mkString)
 }

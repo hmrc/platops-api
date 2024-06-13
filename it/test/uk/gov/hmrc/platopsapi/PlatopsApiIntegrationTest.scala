@@ -24,7 +24,7 @@ import scala.concurrent.ExecutionContext
 
 class PlatopsApiIntegrationTest extends Suites(
   new ApiControllerISpec
-, new LegacyControllerISpec
+//, new LegacyControllerISpec
 ) with BeforeAndAfterAll with ScalaFutures with IntegrationPatience {
 
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global

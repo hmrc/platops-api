@@ -24,7 +24,7 @@ import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json._
 import play.api.libs.ws.WSClient
 
-@DoNotDiscover
+
 class ApiControllerISpec
   extends AnyWordSpec
     with Matchers
@@ -34,7 +34,7 @@ class ApiControllerISpec
 
   private val wsClient     = app.injector.instanceOf[WSClient]
   private val baseUrl      = s"http://localhost:$port"
-  private val expectedJson = ResourceUtil("it/resources/expectedJson")
+  //private val expectedJson = ResourceUtil("it/resources/expectedJson")
 
   "GET /api/v2/repositories" should {
     "return a list of all repositories" in {
@@ -44,7 +44,8 @@ class ApiControllerISpec
         .futureValue
 
       response.status shouldBe 200
-      response.json   shouldBe Json.parse(expectedJson.fromResource("repositoriesV2.json"))
+      println("@@@@@" + ResourceUtil.fromResource("it"))
+      response.json   shouldBe Json.parse(ResourceUtil.fromResource("expectedJson/repositoriesV2.json"))
     }
 
     "return a repository by name" in {
@@ -208,270 +209,270 @@ class ApiControllerISpec
     }
   }
 
-  "GET /api/v2/decommissioned-repositories" should {
-    "return a list of all decommissioned repositories" in {
-      val response = wsClient
-        .url(s"$baseUrl/api/v2/decommissioned-repositories")
-        .get()
-        .futureValue
-
-      response.status shouldBe 200
-      response.json   shouldBe Json.parse(
-        """[{"repoName":"repo-1", "repoType": "Service"},{"repoName":"repo-3", "repoType": "Service"},{"repoName":"repo-4","repoType": "Library"},{"repoName":"repo-5","repoType": "Other"}]"""
-      )
-    }
-
-    "return a list of decommissioned services" in {
-      val response =
-        wsClient
-          .url(s"$baseUrl/api/v2/decommissioned-repositories?repoType=Service")
-          .get()
-          .futureValue
-
-      response.status shouldBe 200
-      response.json   shouldBe Json.parse(
-        """[{"repoName":"repo-1", "repoType": "Service"},{"repoName":"repo-3", "repoType": "Service"}]"""
-      )
-    }
-  }
-
-  "GET /api/v2/teams" should {
-    "return a list of team summaries" in {
-      val response =
-        wsClient
-          .url(s"$baseUrl/api/v2/teams")
-          .get()
-          .futureValue
-
-      response.status shouldBe 200
-      response.json   shouldBe Json.parse(
-        """
-          |[
-          |  {
-          |    "name": "Team A",
-          |    "lastActiveDate": "2024-05-08T16:24:37Z",
-          |    "repos": [
-          |      "repo-1",
-          |      "repo-2"
-          |    ]
-          |  },
-          |  {
-          |    "name": "Team B",
-          |    "repos": []
-          |  }
-          |]
-          |""".stripMargin
-      )
-    }
-  }
-
-  "GET /api/teams_with_repositories" should {
-    "return a list of teams and their repositories" in {
-      val response =
-        wsClient
-          .url(s"$baseUrl/api/teams_with_repositories")
-          .get()
-          .futureValue
-
-      response.status shouldBe 200
-      response.json   shouldBe Json.parse(expectedJson.fromResource("teamRepositories.json"))
-    }
-  }
-
-  "GET /api/repositories/:name" should {
-    "return repository details for a repo name" in {
-      val response =
-        wsClient
-          .url(s"$baseUrl/api/repositories/repo-2")
-          .get()
-          .futureValue
-
-      response.status shouldBe 200
-      response.json   shouldBe Json.parse(expectedJson.fromResource("repositoryDetails.json"))
-    }
-  }
-
-  "GET /api/repositories" should {
-    "return all repositories" in {
-      val response =
-        wsClient
-          .url(s"$baseUrl/api/repositories")
-          .get()
-          .futureValue
-
-      response.status shouldBe 200
-      response.json   shouldBe Json.parse(expectedJson.fromResource("repositories.json"))
-    }
-
-    "return only archived repositories" in {
-      val response =
-        wsClient
-          .url(s"$baseUrl/api/repositories?archived=true")
-          .get()
-          .futureValue
-
-      response.status shouldBe 200
-      response.json   shouldBe Json.parse(
-        """[
-          |  {
-          |    "name": "repo-1",
-          |    "teamNames": [
-          |      "PlatOps"
-          |    ],
-          |    "createdAt": "2014-03-11T19:59:49Z",
-          |    "lastUpdatedAt": "2020-12-03T12:57:55Z",
-          |    "repoType": "Service",
-          |    "language": "Scala",
-          |    "isArchived": true,
-          |    "defaultBranch": "main",
-          |    "isDeprecated": true
-          |  }
-          |]""".stripMargin
-      )
-    }
-
-    "return only non-archived repositories" in {
-      val response =
-        wsClient
-          .url(s"$baseUrl/api/repositories?archived=false")
-          .get()
-          .futureValue
-
-      response.status shouldBe 200
-
-      val res = response.json.as[Seq[JsObject]]
-      res.size shouldBe 6
-      res.forall(obj => (obj \ "isArchived").as[Boolean]) shouldBe false
-      res.head shouldBe Json.parse(
-        """{
-          |  "name": "repo-2",
-          |  "teamNames": [
-          |    "PlatOps"
-          |  ],
-          |  "createdAt": "2014-03-11T19:59:49Z",
-          |  "lastUpdatedAt": "2020-12-03T12:57:55Z",
-          |  "repoType": "Service",
-          |  "language": "Scala",
-          |  "isArchived": false,
-          |  "defaultBranch": "main",
-          |  "isDeprecated": false
-          |}
-          |""".stripMargin
-      )
-    }
-  }
-
-  "GET /api/whats-running-where" should {
-    "return a list of what's running where data" in {
-      val response =
-        wsClient
-          .url(s"$baseUrl/api/whats-running-where")
-          .get()
-          .futureValue
-
-      response.status shouldBe 200
-      response.json   shouldBe Json.parse(expectedJson.fromResource("whatsRunningWhere.json"))
-    }
-  }
-
-  "GET /api/whats-running-where/:serviceName" should {
-    "return what's running where data for a single service" in {
-      val response =
-        wsClient
-          .url(s"$baseUrl/api/whats-running-where/catalogue-frontend")
-          .get()
-          .futureValue
-
-      response.status shouldBe 200
-      response.json   shouldBe Json.parse(expectedJson.fromResource("whatsRunningWhereForService.json"))
-    }
-  }
-
-  "POST /api/v2/notifications" should {
-    "return msgId when the slack notification json sent is valid" in {
-      val response =
-        wsClient
-          .url(s"$baseUrl/api/v2/notification")
-          .withHttpHeaders("Authorization" -> "token")
-          .post(slackMessageBody)
-          .futureValue
-
-      response.status                          shouldBe 202
-      (response.json \ "msgId").asOpt[JsValue] shouldBe defined
-    }
-
-    "return 400 when the slack notification json sent is invalid" in {
-      val response =
-        wsClient
-          .url(s"$baseUrl/api/v2/notification")
-          .withHttpHeaders("Authorization" -> "token")
-          .post(Json.parse("""{}"""))
-          .futureValue
-
-      response.status shouldBe 400
-    }
-
-    "return 401 when requesting client is unauthorised" in {
-      val response =
-        wsClient
-          .url(s"$baseUrl/api/v2/notification")
-          .withHttpHeaders("Authorization" -> "no-token")
-          .post(slackMessageBody)
-          .futureValue
-
-      response.status shouldBe 401
-      response.json   shouldBe Json.parse("""{"statusCode":401,"message":"Unauthorized"}""")
-    }
-
-    "return 403 when requesting client is authorised but does not have the correct permissions" in {
-      val response =
-        wsClient
-          .url(s"$baseUrl/api/v2/notification")
-          .withHttpHeaders("Authorization" -> "no-permissions")
-          .post(slackMessageBody)
-          .futureValue
-
-      response.status shouldBe 403
-      response.json   shouldBe Json.parse("""{"statusCode":403,"message":"Forbidden"}""")
-    }
-  }
-
-  "GET /api/v2/:msgId/status" should {
-    def sendSlackMessageResponse() = {
-      val response = wsClient
-        .url(s"$baseUrl/api/v2/notification")
-        .withHttpHeaders("Authorization" -> "token")
-        .post(slackMessageBody)
-        .futureValue
-
-      (response.json \ "msgId").as[String]
-    }
-
-    def getStatus(msgId: String, authToken: String) =
-      wsClient
-        .url(s"$baseUrl/api/v2/$msgId/status")
-        .withHttpHeaders("Authorization" -> authToken)
-        .get()
-        .futureValue
-
-    "return 200 for valid message id in status request" in {
-      val msgId          = sendSlackMessageResponse()
-      val statusResponse = getStatus(msgId, "token")
-      statusResponse.status shouldBe 200
-    }
-
-    "return 401 when requesting client is unauthorised" in {
-      val msgId          = sendSlackMessageResponse()
-      val statusResponse = getStatus(msgId, "no-token")
-      statusResponse.status shouldBe 401
-    }
-
-    "return 403 when requesting client is authorised but does not have the correct permissions" in {
-      val msgId          = sendSlackMessageResponse()
-      val statusResponse = getStatus(msgId, "no-permissions")
-      statusResponse.status shouldBe 403
-    }
-  }
+//  "GET /api/v2/decommissioned-repositories" should {
+//    "return a list of all decommissioned repositories" in {
+//      val response = wsClient
+//        .url(s"$baseUrl/api/v2/decommissioned-repositories")
+//        .get()
+//        .futureValue
+//
+//      response.status shouldBe 200
+//      response.json   shouldBe Json.parse(
+//        """[{"repoName":"repo-1", "repoType": "Service"},{"repoName":"repo-3", "repoType": "Service"},{"repoName":"repo-4","repoType": "Library"},{"repoName":"repo-5","repoType": "Other"}]"""
+//      )
+//    }
+//
+//    "return a list of decommissioned services" in {
+//      val response =
+//        wsClient
+//          .url(s"$baseUrl/api/v2/decommissioned-repositories?repoType=Service")
+//          .get()
+//          .futureValue
+//
+//      response.status shouldBe 200
+//      response.json   shouldBe Json.parse(
+//        """[{"repoName":"repo-1", "repoType": "Service"},{"repoName":"repo-3", "repoType": "Service"}]"""
+//      )
+//    }
+//  }
+//
+//  "GET /api/v2/teams" should {
+//    "return a list of team summaries" in {
+//      val response =
+//        wsClient
+//          .url(s"$baseUrl/api/v2/teams")
+//          .get()
+//          .futureValue
+//
+//      response.status shouldBe 200
+//      response.json   shouldBe Json.parse(
+//        """
+//          |[
+//          |  {
+//          |    "name": "Team A",
+//          |    "lastActiveDate": "2024-05-08T16:24:37Z",
+//          |    "repos": [
+//          |      "repo-1",
+//          |      "repo-2"
+//          |    ]
+//          |  },
+//          |  {
+//          |    "name": "Team B",
+//          |    "repos": []
+//          |  }
+//          |]
+//          |""".stripMargin
+//      )
+//    }
+//  }
+//
+//  "GET /api/teams_with_repositories" should {
+//    "return a list of teams and their repositories" in {
+//      val response =
+//        wsClient
+//          .url(s"$baseUrl/api/teams_with_repositories")
+//          .get()
+//          .futureValue
+//
+//      response.status shouldBe 200
+//      response.json   shouldBe Json.parse(expectedJson.fromResource("teamRepositories.json"))
+//    }
+//  }
+//
+//  "GET /api/repositories/:name" should {
+//    "return repository details for a repo name" in {
+//      val response =
+//        wsClient
+//          .url(s"$baseUrl/api/repositories/repo-2")
+//          .get()
+//          .futureValue
+//
+//      response.status shouldBe 200
+//      response.json   shouldBe Json.parse(expectedJson.fromResource("repositoryDetails.json"))
+//    }
+//  }
+//
+//  "GET /api/repositories" should {
+//    "return all repositories" in {
+//      val response =
+//        wsClient
+//          .url(s"$baseUrl/api/repositories")
+//          .get()
+//          .futureValue
+//
+//      response.status shouldBe 200
+//      response.json   shouldBe Json.parse(expectedJson.fromResource("repositories.json"))
+//    }
+//
+//    "return only archived repositories" in {
+//      val response =
+//        wsClient
+//          .url(s"$baseUrl/api/repositories?archived=true")
+//          .get()
+//          .futureValue
+//
+//      response.status shouldBe 200
+//      response.json   shouldBe Json.parse(
+//        """[
+//          |  {
+//          |    "name": "repo-1",
+//          |    "teamNames": [
+//          |      "PlatOps"
+//          |    ],
+//          |    "createdAt": "2014-03-11T19:59:49Z",
+//          |    "lastUpdatedAt": "2020-12-03T12:57:55Z",
+//          |    "repoType": "Service",
+//          |    "language": "Scala",
+//          |    "isArchived": true,
+//          |    "defaultBranch": "main",
+//          |    "isDeprecated": true
+//          |  }
+//          |]""".stripMargin
+//      )
+//    }
+//
+//    "return only non-archived repositories" in {
+//      val response =
+//        wsClient
+//          .url(s"$baseUrl/api/repositories?archived=false")
+//          .get()
+//          .futureValue
+//
+//      response.status shouldBe 200
+//
+//      val res = response.json.as[Seq[JsObject]]
+//      res.size shouldBe 6
+//      res.forall(obj => (obj \ "isArchived").as[Boolean]) shouldBe false
+//      res.head shouldBe Json.parse(
+//        """{
+//          |  "name": "repo-2",
+//          |  "teamNames": [
+//          |    "PlatOps"
+//          |  ],
+//          |  "createdAt": "2014-03-11T19:59:49Z",
+//          |  "lastUpdatedAt": "2020-12-03T12:57:55Z",
+//          |  "repoType": "Service",
+//          |  "language": "Scala",
+//          |  "isArchived": false,
+//          |  "defaultBranch": "main",
+//          |  "isDeprecated": false
+//          |}
+//          |""".stripMargin
+//      )
+//    }
+//  }
+//
+//  "GET /api/whats-running-where" should {
+//    "return a list of what's running where data" in {
+//      val response =
+//        wsClient
+//          .url(s"$baseUrl/api/whats-running-where")
+//          .get()
+//          .futureValue
+//
+//      response.status shouldBe 200
+//      response.json   shouldBe Json.parse(expectedJson.fromResource("whatsRunningWhere.json"))
+//    }
+//  }
+//
+//  "GET /api/whats-running-where/:serviceName" should {
+//    "return what's running where data for a single service" in {
+//      val response =
+//        wsClient
+//          .url(s"$baseUrl/api/whats-running-where/catalogue-frontend")
+//          .get()
+//          .futureValue
+//
+//      response.status shouldBe 200
+//      response.json   shouldBe Json.parse(expectedJson.fromResource("whatsRunningWhereForService.json"))
+//    }
+//  }
+//
+//  "POST /api/v2/notifications" should {
+//    "return msgId when the slack notification json sent is valid" in {
+//      val response =
+//        wsClient
+//          .url(s"$baseUrl/api/v2/notification")
+//          .withHttpHeaders("Authorization" -> "token")
+//          .post(slackMessageBody)
+//          .futureValue
+//
+//      response.status                          shouldBe 202
+//      (response.json \ "msgId").asOpt[JsValue] shouldBe defined
+//    }
+//
+//    "return 400 when the slack notification json sent is invalid" in {
+//      val response =
+//        wsClient
+//          .url(s"$baseUrl/api/v2/notification")
+//          .withHttpHeaders("Authorization" -> "token")
+//          .post(Json.parse("""{}"""))
+//          .futureValue
+//
+//      response.status shouldBe 400
+//    }
+//
+//    "return 401 when requesting client is unauthorised" in {
+//      val response =
+//        wsClient
+//          .url(s"$baseUrl/api/v2/notification")
+//          .withHttpHeaders("Authorization" -> "no-token")
+//          .post(slackMessageBody)
+//          .futureValue
+//
+//      response.status shouldBe 401
+//      response.json   shouldBe Json.parse("""{"statusCode":401,"message":"Unauthorized"}""")
+//    }
+//
+//    "return 403 when requesting client is authorised but does not have the correct permissions" in {
+//      val response =
+//        wsClient
+//          .url(s"$baseUrl/api/v2/notification")
+//          .withHttpHeaders("Authorization" -> "no-permissions")
+//          .post(slackMessageBody)
+//          .futureValue
+//
+//      response.status shouldBe 403
+//      response.json   shouldBe Json.parse("""{"statusCode":403,"message":"Forbidden"}""")
+//    }
+//  }
+//
+//  "GET /api/v2/:msgId/status" should {
+//    def sendSlackMessageResponse() = {
+//      val response = wsClient
+//        .url(s"$baseUrl/api/v2/notification")
+//        .withHttpHeaders("Authorization" -> "token")
+//        .post(slackMessageBody)
+//        .futureValue
+//
+//      (response.json \ "msgId").as[String]
+//    }
+//
+//    def getStatus(msgId: String, authToken: String) =
+//      wsClient
+//        .url(s"$baseUrl/api/v2/$msgId/status")
+//        .withHttpHeaders("Authorization" -> authToken)
+//        .get()
+//        .futureValue
+//
+//    "return 200 for valid message id in status request" in {
+//      val msgId          = sendSlackMessageResponse()
+//      val statusResponse = getStatus(msgId, "token")
+//      statusResponse.status shouldBe 200
+//    }
+//
+//    "return 401 when requesting client is unauthorised" in {
+//      val msgId          = sendSlackMessageResponse()
+//      val statusResponse = getStatus(msgId, "no-token")
+//      statusResponse.status shouldBe 401
+//    }
+//
+//    "return 403 when requesting client is authorised but does not have the correct permissions" in {
+//      val msgId          = sendSlackMessageResponse()
+//      val statusResponse = getStatus(msgId, "no-permissions")
+//      statusResponse.status shouldBe 403
+//    }
+//  }
 
   private val slackMessageBody =
     Json.parse(

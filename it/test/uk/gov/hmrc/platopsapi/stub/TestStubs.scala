@@ -77,20 +77,20 @@ object TestStubs {
       .map { response => assert(is2xx(response.status), s"Failed to call stub DELETE $url: ${response.body}"); () }
       .recoverWith { case e => Future.failed(new RuntimeException(s"Failed to call stub DELETE $url: ${e.getMessage}", e)) }
 
-  private val seedCollectionsJson = ResourceUtil("it/resources/seedCollectionsJson")
+  //private val seedCollectionsJson = ResourceUtil("it/resources/seedCollectionsJson")
 
   private def resetServices(): Future[List[Unit]] =
     Future.sequence(
       List(
         //teams-and-repositories
-        delete(gitRepositories).flatMap(_ => post(gitRepositories, seedCollectionsJson.fromResource("gitRepositories.json"))),
-        put(deletedGitRepositories, seedCollectionsJson.fromResource("deletedGitRepositories.json")),
-        delete(teamSummaries).flatMap(_ => post(teamSummaries, seedCollectionsJson.fromResource("teamSummaries.json"))),
+        delete(gitRepositories).flatMap(_ => post(gitRepositories, ResourceUtil.fromResource("gitRepositories.json"))),
+        put(deletedGitRepositories, ResourceUtil.fromResource("deletedGitRepositories.json")),
+        delete(teamSummaries).flatMap(_ => post(teamSummaries, ResourceUtil.fromResource("teamSummaries.json"))),
         //releases-api
-        delete(releaseEvents).flatMap(_ => post(releaseEvents, seedCollectionsJson.fromResource("deploymentEvents.json"))),
+        delete(releaseEvents).flatMap(_ => post(releaseEvents, ResourceUtil.fromResource("deploymentEvents.json"))),
         //slack-notifications
-        post(internalAuthToken, seedCollectionsJson.fromResource("slackNotificationsToken.json")),
-        post(internalAuthToken, seedCollectionsJson.fromResource("slackNotificationsTokenNoPermissions.json"))
+        post(internalAuthToken, ResourceUtil.fromResource("slackNotificationsToken.json")),
+        post(internalAuthToken, ResourceUtil.fromResource("slackNotificationsTokenNoPermissions.json"))
       )
     )
 
