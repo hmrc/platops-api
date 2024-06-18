@@ -1,0 +1,9 @@
+{
+    "token": "no-permissions",
+    "principal": "platops-it-no-perms",
+    "permissions": [{
+        "resourceType": "slack-notifications",
+        "resourceLocation": "v2/notification",
+        "actions": [""]
+    }]
+}

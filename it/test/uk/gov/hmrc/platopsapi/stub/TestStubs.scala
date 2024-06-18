@@ -1,3 +1,19 @@
+/*
+ * Copyright 2024 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package uk.gov.hmrc.platopsapi.stub
 
 import org.apache.pekko.actor.ActorSystem
@@ -6,21 +22,24 @@ import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{Json, Reads, __}
 import play.api.libs.ws.{WSClient, WSClientConfig}
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
+import uk.gov.hmrc.platopsapi.ResourceUtil
+import uk.gov.hmrc.platopsapi.ResourceUtil.fromResource
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import java.io.File
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, Future}
-import scala.io.Source
-import scala.util.Using
 
 object TestStubs {
   private val teamsAndRepositoriesBaseUrl = "http://localhost:9015"
-  private val dbNames                     = Set("teams-and-repositories")
+  private val releasesApiBaseUrl          = "http://localhost:8008"
+  private val internalAuthBaseUrl         = "http://localhost:8470"
+  private val dbNames                     = Set("teams-and-repositories", "releases", "internal-auth") // add database name here to check for production data
 
-  private val gitRepositories             = s"$teamsAndRepositoriesBaseUrl/test-only/repos"
-  private val deletedGitRepositories      = s"$teamsAndRepositoriesBaseUrl/test-only/deleted-repos"
-  private val teamSummaries               = s"$teamsAndRepositoriesBaseUrl/test-only/team-summaries"
+  private val gitRepositories        = s"$teamsAndRepositoriesBaseUrl/test-only/repos"
+  private val deletedGitRepositories = s"$teamsAndRepositoriesBaseUrl/test-only/deleted-repos"
+  private val teamSummaries          = s"$teamsAndRepositoriesBaseUrl/test-only/team-summaries"
+  private val releaseEvents          = s"$releasesApiBaseUrl/test-only/release-events"
+  private val internalAuthToken      = s"$internalAuthBaseUrl/test-only/token"
 
   private val wsClient: WSClient = {
     implicit val as: ActorSystem = ActorSystem("test-actor-system")
@@ -59,25 +78,29 @@ object TestStubs {
       .map { response => assert(is2xx(response.status), s"Failed to call stub DELETE $url: ${response.body}"); () }
       .recoverWith { case e => Future.failed(new RuntimeException(s"Failed to call stub DELETE $url: ${e.getMessage}", e)) }
 
-  private def resetServices(): Future[List[Unit]] = {
+  private def resetServices(): Future[List[Unit]] =
     Future.sequence(
       List(
-        delete(gitRepositories).flatMap(_ => post(gitRepositories, fromResource("gitRepositories.json"))),
-        put(deletedGitRepositories, fromResource("deletedGitRepositories.json")),
-        delete(teamSummaries).flatMap(_ => post(teamSummaries, fromResource("teamSummaries.json")))
+        //teams-and-repositories
+        delete(gitRepositories).flatMap(_ => post(gitRepositories, fromResource("/seedCollectionsJson/gitRepositories.json"))),
+        put(deletedGitRepositories, fromResource("/seedCollectionsJson/deletedGitRepositories.json")),
+        delete(teamSummaries).flatMap(_ => post(teamSummaries, fromResource("/seedCollectionsJson/teamSummaries.json"))),
+        //releases-api
+        delete(releaseEvents).flatMap(_ => post(releaseEvents, fromResource("/seedCollectionsJson/deploymentEvents.json"))),
+        //slack-notifications
+        post(internalAuthToken, fromResource("/seedCollectionsJson/slackNotificationsToken.json")),
+        post(internalAuthToken, fromResource("/seedCollectionsJson/slackNotificationsTokenNoPermissions.json"))
       )
     )
-  }
 
   case class Database(name: String, sizeOnDisk: Long)
 
   object Database {
     implicit val reads: Reads[Database] =
-      ((__ \ "name"       ).read[String]
+      ( (__ \ "name"      ).read[String]
       ~ (__ \ "sizeOnDisk").read[Long]
       )(Database.apply _)
   }
-
 
   private def checkMongoProdData(): Future[Unit] = {
     val dataThreshold = 1000000 // bytes
@@ -107,19 +130,4 @@ object TestStubs {
       } yield ()
       , 2.minutes
     )
-
-  private def fromResource(resource: String): String = {
-    val resourcePath = s"it/resources/$resource"
-    Option(new File(System.getProperty("user.dir"), resourcePath))
-      .fold(
-        sys.error(s"Could not find resource at $resourcePath")
-      )(
-        resource =>
-          Using(Source.fromFile(resource)) { source =>
-            source.mkString
-          }.getOrElse {
-            sys.error(s"Error reading resource from $resourcePath")
-          }
-      )
-  }
 }

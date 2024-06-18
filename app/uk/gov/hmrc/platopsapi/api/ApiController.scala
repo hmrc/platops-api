@@ -31,10 +31,12 @@ class ApiController @Inject()(
   apiConnector  : ApiConnector,
   servicesConfig: ServicesConfig,
   cc            : ControllerComponents
-  ) extends BackendController(cc) {
+) extends BackendController(cc) {
 
   private val prCommenterUrl           = servicesConfig.baseUrl("pr-commenter")
   private val teamsAndRepositoriesUrl  = servicesConfig.baseUrl("teams-and-repositories")
+  private val releasesApiUrl           = servicesConfig.baseUrl("releases-api")
+  private val slackNotificationsUrl    = servicesConfig.baseUrl("slack-notifications")
 
   private def streamParser: BodyParser[Source[ByteString, _]] = BodyParser { _ =>
     Accumulator.source[ByteString].map(Right.apply)(cc.executionContext)
@@ -50,8 +52,71 @@ class ApiController @Inject()(
       apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/decommissioned-repositories?repoType=$repoType")
     }
 
+  def repositoriesV2(
+    name       : Option[String],
+    team       : Option[String],
+    owningTeam : Option[String],
+    archived   : Option[Boolean],
+    repoType   : Option[String],
+    serviceType: Option[String],
+    tag        : Option[List[String]]
+  ) = Action.async { implicit request =>
+
+    val queryParams = Seq(
+      name.map("name" -> _)
+    , team.map("team" -> _)
+    , owningTeam.map("owningTeam" -> _)
+    , archived.map("archived" -> _.toString)
+    , repoType.map("repoType" -> _)
+    , serviceType.map("serviceType" -> _)
+    ).flatten ++
+      tag.getOrElse(Seq.empty).map("tag" -> _)
+
+    apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/repositories?$queryParams")
+  }
+
   def teams() =
     Action.async { implicit request =>
       apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/teams")
+    }
+
+  def teamsWithRepos() =
+    Action.async { implicit request =>
+      apiConnector.get(url"$teamsAndRepositoriesUrl/api/teams_with_repositories")
+    }
+
+  def repositoryDetails(name: String) =
+    Action.async { implicit  request =>
+      apiConnector.get(url"$teamsAndRepositoriesUrl/api/repositories/$name")
+    }
+
+  def repositories(archived: Option[Boolean]) =
+    Action.async { implicit  request =>
+      apiConnector.get(url"$teamsAndRepositoriesUrl/api/repositories?archived=$archived")
+    }
+
+  def whatsRunningWhere() =
+    Action.async { implicit request =>
+      apiConnector.get(url"$releasesApiUrl/releases-api/whats-running-where")
+    }
+
+  def whatsRunningWhereForService(serviceName: String) =
+    Action.async { implicit request =>
+      apiConnector.get(url"$releasesApiUrl/releases-api/whats-running-where/$serviceName")
+    }
+
+  def sendLegacySlackNotification() =
+    Action.async(parse.json) { implicit  request =>
+      apiConnector.post(url"$slackNotificationsUrl/slack-notifications/notification", request.body)
+    }
+
+  def sendSlackNotification() =
+    Action.async(parse.json) { implicit  request =>
+      apiConnector.post(url"$slackNotificationsUrl/slack-notifications/v2/notification", request.body)
+    }
+
+  def slackNotificationStatus(msgId: String) =
+    Action.async { implicit request =>
+      apiConnector.get(url"$slackNotificationsUrl/slack-notifications/v2/$msgId/status")
     }
 }

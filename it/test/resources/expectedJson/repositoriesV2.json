@@ -1,0 +1,155 @@
+[
+  {
+    "name": "repo-1",
+    "description": "archived",
+    "url": "https://github.com/hmrc/repo-1",
+    "createdDate": "2014-03-11T19:59:49Z",
+    "lastActiveDate": "2020-12-03T12:57:55Z",
+    "isPrivate": false,
+    "repoType": "Service",
+    "serviceType": "backend",
+    "tags": [
+      "api"
+    ],
+    "owningTeams": [
+      "PlatOps"
+    ],
+    "language": "Scala",
+    "isArchived": true,
+    "defaultBranch": "main",
+    "isDeprecated": true,
+    "teamNames": [
+      "PlatOps"
+    ]
+  },
+  {
+    "name": "repo-2",
+    "description": "not-archived",
+    "url": "https://github.com/hmrc/repo-2",
+    "createdDate": "2014-03-11T19:59:49Z",
+    "lastActiveDate": "2020-12-03T12:57:55Z",
+    "isPrivate": false,
+    "repoType": "Service",
+    "serviceType": "frontend",
+    "tags": [],
+    "digitalServiceName": "",
+    "owningTeams": [
+      "PlatOps"
+    ],
+    "language": "Scala",
+    "isArchived": false,
+    "defaultBranch": "main",
+    "isDeprecated": false,
+    "teamNames": [
+      "PlatOps"
+    ]
+  },
+  {
+    "name": "repo-3",
+    "description": "library",
+    "url": "https://github.com/hmrc/repo-3",
+    "createdDate": "2014-03-11T19:59:49Z",
+    "lastActiveDate": "2020-12-03T12:57:55Z",
+    "isPrivate": false,
+    "repoType": "Library",
+    "tags": [],
+    "digitalServiceName": "",
+    "owningTeams": [
+      "PlatOps"
+    ],
+    "language": "Scala",
+    "isArchived": false,
+    "defaultBranch": "main",
+    "isDeprecated": false,
+    "teamNames": [
+      "PlatOps"
+    ]
+  },
+  {
+    "name": "repo-4",
+    "description": "other",
+    "url": "https://github.com/hmrc/repo-4",
+    "createdDate": "2014-03-11T19:59:49Z",
+    "lastActiveDate": "2020-12-03T12:57:55Z",
+    "isPrivate": false,
+    "repoType": "Other",
+    "tags": [],
+    "digitalServiceName": "",
+    "owningTeams": [
+      "PlatOps"
+    ],
+    "language": "Scala",
+    "isArchived": false,
+    "defaultBranch": "main",
+    "isDeprecated": false,
+    "teamNames": [
+      "PlatOps"
+    ]
+  },
+  {
+    "name": "repo-5",
+    "description": "prototype",
+    "url": "https://github.com/hmrc/repo-5",
+    "createdDate": "2014-03-11T19:59:49Z",
+    "lastActiveDate": "2020-12-03T12:57:55Z",
+    "isPrivate": false,
+    "repoType": "Prototype",
+    "tags": [],
+    "digitalServiceName": "",
+    "owningTeams": [
+      "PlatOps"
+    ],
+    "language": "Scala",
+    "isArchived": false,
+    "defaultBranch": "main",
+    "isDeprecated": false,
+    "teamNames": [
+      "PlatOps"
+    ]
+  },
+  {
+    "name": "repo-6",
+    "description": "test",
+    "url": "https://github.com/hmrc/repo-6",
+    "createdDate": "2014-03-11T19:59:49Z",
+    "lastActiveDate": "2020-12-03T12:57:55Z",
+    "isPrivate": false,
+    "repoType": "Test",
+    "tags": [],
+    "digitalServiceName": "",
+    "owningTeams": [
+      "PlatOps"
+    ],
+    "language": "Scala",
+    "isArchived": false,
+    "defaultBranch": "main",
+    "isDeprecated": false,
+    "teamNames": [
+      "PlatOps"
+    ]
+  },
+  {
+    "name": "repo-7",
+    "description": "service",
+    "url": "https://github.com/hmrc/repo-7",
+    "createdDate": "2014-03-11T19:59:49Z",
+    "lastActiveDate": "2020-12-03T12:57:55Z",
+    "isPrivate": false,
+    "repoType": "Service",
+    "serviceType": "backend",
+    "tags": [
+      "api"
+    ],
+    "digitalServiceName": "",
+    "owningTeams": [
+      "TestTeam"
+    ],
+    "language": "Scala",
+    "isArchived": false,
+    "defaultBranch": "main",
+    "isDeprecated": false,
+    "teamNames": [
+      "TestTeam"
+    ]
+  }
+]

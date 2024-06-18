@@ -1,0 +1,62 @@
+{
+  "name": "repo-2",
+  "description": "not-archived",
+  "isPrivate": false,
+  "createdAt": "2014-03-11T19:59:49Z",
+  "lastActive": "2020-12-03T12:57:55Z",
+  "repoType": "Service",
+  "owningTeams": [
+    "PlatOps"
+  ],
+  "teamNames": [
+    "PlatOps"
+  ],
+  "githubUrl": {
+    "name": "github-com",
+    "displayName": "GitHub.com",
+    "url": "https://github.com/hmrc/repo-2"
+  },
+  "ci": [
+    {
+      "name": "Build",
+      "displayName": "Build",
+      "url": "https://build.tax.service.gov.uk/job/PlatOps/job/repo-2"
+    }
+  ],
+  "environments": [
+    {
+      "name": "Development",
+      "services": [
+        {
+          "name": "ser1",
+          "displayName": "ser 1",
+          "url": "http://ser1/repo-2"
+        },
+        {
+          "name": "ser2",
+          "displayName": "ser 2",
+          "url": "http://ser2/repo-2"
+        }
+      ]
+    },
+    {
+      "name": "Staging",
+      "services": [
+        {
+          "name": "ser1",
+          "displayName": "ser 1",
+          "url": "http://ser1/repo-2"
+        },
+        {
+          "name": "ser2",
+          "displayName": "ser 2",
+          "url": "http://ser2/repo-2"
+        }
+      ]
+    }
+  ],
+  "language": "Scala",
+  "isArchived": false,
+  "defaultBranch": "main",
+  "isDeprecated": false
+}

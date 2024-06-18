@@ -1,0 +1,93 @@
+[
+  {
+    "name": "repo-1",
+    "teamNames": [
+      "PlatOps"
+    ],
+    "createdAt": "2014-03-11T19:59:49Z",
+    "lastUpdatedAt": "2020-12-03T12:57:55Z",
+    "repoType": "Service",
+    "language": "Scala",
+    "isArchived": true,
+    "defaultBranch": "main",
+    "isDeprecated": true
+  },
+  {
+    "name": "repo-2",
+    "teamNames": [
+      "PlatOps"
+    ],
+    "createdAt": "2014-03-11T19:59:49Z",
+    "lastUpdatedAt": "2020-12-03T12:57:55Z",
+    "repoType": "Service",
+    "language": "Scala",
+    "isArchived": false,
+    "defaultBranch": "main",
+    "isDeprecated": false
+  },
+  {
+    "name": "repo-3",
+    "teamNames": [
+      "PlatOps"
+    ],
+    "createdAt": "2014-03-11T19:59:49Z",
+    "lastUpdatedAt": "2020-12-03T12:57:55Z",
+    "repoType": "Library",
+    "language": "Scala",
+    "isArchived": false,
+    "defaultBranch": "main",
+    "isDeprecated": false
+  },
+  {
+    "name": "repo-4",
+    "teamNames": [
+      "PlatOps"
+    ],
+    "createdAt": "2014-03-11T19:59:49Z",
+    "lastUpdatedAt": "2020-12-03T12:57:55Z",
+    "repoType": "Other",
+    "language": "Scala",
+    "isArchived": false,
+    "defaultBranch": "main",
+    "isDeprecated": false
+  },
+  {
+    "name": "repo-5",
+    "teamNames": [
+      "PlatOps"
+    ],
+    "createdAt": "2014-03-11T19:59:49Z",
+    "lastUpdatedAt": "2020-12-03T12:57:55Z",
+    "repoType": "Prototype",
+    "language": "Scala",
+    "isArchived": false,
+    "defaultBranch": "main",
+    "isDeprecated": false
+  },
+  {
+    "name": "repo-6",
+    "teamNames": [
+      "PlatOps"
+    ],
+    "createdAt": "2014-03-11T19:59:49Z",
+    "lastUpdatedAt": "2020-12-03T12:57:55Z",
+    "repoType": "Test",
+    "language": "Scala",
+    "isArchived": false,
+    "defaultBranch": "main",
+    "isDeprecated": false
+  },
+  {
+    "name": "repo-7",
+    "teamNames": [
+      "TestTeam"
+    ],
+    "createdAt": "2014-03-11T19:59:49Z",
+    "lastUpdatedAt": "2020-12-03T12:57:55Z",
+    "repoType": "Service",
+    "language": "Scala",
+    "isArchived": false,
+    "defaultBranch": "main",
+    "isDeprecated": false
+  }
+]

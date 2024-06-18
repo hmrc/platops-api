@@ -1,8 +1,23 @@
 # microservice specific routes
 
 # PR-Commenter
-POST /repositories/:repoName/prs/:prId/comments/buildhook      uk.gov.hmrc.platopsapi.api.ApiController.prCommenterBuildhook(repoName: String, prId: Long)
+POST     /repositories/:repoName/prs/:prId/comments/buildhook      uk.gov.hmrc.platopsapi.api.ApiController.prCommenterBuildhook(repoName: String, prId: Long)
+
+# Teams and Repositories Legacy
+GET      /teams_with_repositories                                  uk.gov.hmrc.platopsapi.api.ApiController.teamsWithRepos()
+GET      /repositories/:name                                       uk.gov.hmrc.platopsapi.api.ApiController.repositoryDetails(name)
+GET      /repositories                                             uk.gov.hmrc.platopsapi.api.ApiController.repositories(archived: Option[Boolean])
 
 # Teams and Repositories
-GET  /v2/teams                                                 uk.gov.hmrc.platopsapi.api.ApiController.teams()
-GET  /v2/decommissioned-repositories                           uk.gov.hmrc.platopsapi.api.ApiController.decommissionedRepos(repoType: Option[String])
+GET      /v2/teams                                                 uk.gov.hmrc.platopsapi.api.ApiController.teams()
+GET      /v2/repositories                                          uk.gov.hmrc.platopsapi.api.ApiController.repositoriesV2(name: Option[String], team: Option[String], owningTeam: Option[String], archived: Option[Boolean], repoType: Option[String], serviceType: Option[String], tag: Option[List[String]])
+GET      /v2/decommissioned-repositories                           uk.gov.hmrc.platopsapi.api.ApiController.decommissionedRepos(repoType: Option[String])
+
+# Releases
+GET      /whats-running-where                                      uk.gov.hmrc.platopsapi.api.ApiController.whatsRunningWhere()
+GET      /whats-running-where/:serviceName                         uk.gov.hmrc.platopsapi.api.ApiController.whatsRunningWhereForService(serviceName: String)
+
+# Slack Notifictions
+POST     /notification                                             uk.gov.hmrc.platopsapi.api.ApiController.sendLegacySlackNotification()
+POST     /v2/notification                                          uk.gov.hmrc.platopsapi.api.ApiController.sendSlackNotification()
+GET      /v2/:msgId/status                                         uk.gov.hmrc.platopsapi.api.ApiController.slackNotificationStatus(msgId: String)

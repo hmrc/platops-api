@@ -1,0 +1,9 @@
+{
+    "token": "token",
+    "principal": "platops-api-it",
+    "permissions": [{
+        "resourceType": "slack-notifications",
+        "resourceLocation": "v2/notification",
+        "actions": ["SEND_NOTIFICATION"]
+    }]
+}

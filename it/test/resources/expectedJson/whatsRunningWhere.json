@@ -1,0 +1,220 @@
+[
+  {
+    "applicationName": "catalogue-frontend",
+    "versions": [
+      {
+        "environment": "development",
+        "versionNumber": "4.254.0",
+        "lastDeployed": "1969-12-28T00:00:00Z",
+        "deploymentId": "0",
+        "config": [
+          {
+            "repoName": "app-config-common",
+            "fileName": "development-microservice-common.yaml",
+            "commitId": "1234"
+          },
+          {
+            "repoName": "app-config-development",
+            "fileName": "catalogue-frontend.yaml",
+            "commitId": "5678"
+          }
+        ]
+      },
+      {
+        "environment": "qa",
+        "versionNumber": "4.255.0",
+        "lastDeployed": "2020-06-11T15:22:00Z",
+        "deploymentId": "2",
+        "config": [
+          {
+            "repoName": "app-config-common",
+            "fileName": "qa-microservice-common.yaml",
+            "commitId": "1234"
+          },
+          {
+            "repoName": "app-config-qa",
+            "fileName": "catalogue-frontend.yaml",
+            "commitId": "5678"
+          }
+        ]
+      },
+      {
+        "environment": "staging",
+        "versionNumber": "4.255.0",
+        "lastDeployed": "1969-12-28T00:00:00Z",
+        "deploymentId": "1",
+        "config": [
+          {
+            "repoName": "app-config-common",
+            "fileName": "staging-microservice-common.yaml",
+            "commitId": "1234"
+          },
+          {
+            "repoName": "app-config-staging",
+            "fileName": "catalogue-frontend.yaml",
+            "commitId": "5678"
+          }
+        ]
+      },
+      {
+        "environment": "externaltest",
+        "versionNumber": "4.255.0",
+        "lastDeployed": "2020-06-11T15:22:00Z",
+        "deploymentId": "3",
+        "config": [
+          {
+            "repoName": "app-config-common",
+            "fileName": "externaltest-microservice-common.yaml",
+            "commitId": "1234"
+          },
+          {
+            "repoName": "app-config-externaltest",
+            "fileName": "catalogue-frontend.yaml",
+            "commitId": "5678"
+          }
+        ]
+      },
+      {
+        "environment": "production",
+        "versionNumber": "4.255.0",
+        "lastDeployed": "2020-06-11T15:22:00Z",
+        "deploymentId": "4",
+        "config": [
+          {
+            "repoName": "app-config-common",
+            "fileName": "production-microservice-common.yaml",
+            "commitId": "1234"
+          },
+          {
+            "repoName": "app-config-production",
+            "fileName": "catalogue-frontend.yaml",
+            "commitId": "5678"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "applicationName": "play-authorisation",
+    "versions": [
+      {
+        "environment": "staging",
+        "versionNumber": "6.159.0",
+        "lastDeployed": "1969-12-28T00:00:00Z",
+        "deploymentId": "5",
+        "config": [
+          {
+            "repoName": "app-config-common",
+            "fileName": "staging-microservice-common.yaml",
+            "commitId": "1234"
+          },
+          {
+            "repoName": "app-config-staging",
+            "fileName": "play-authorisation.yaml",
+            "commitId": "5678"
+          }
+        ]
+      },
+      {
+        "environment": "production",
+        "versionNumber": "6.160.0",
+        "lastDeployed": "1969-12-28T00:00:00Z",
+        "deploymentId": "6",
+        "config": [
+          {
+            "repoName": "app-config-common",
+            "fileName": "production-microservice-common.yaml",
+            "commitId": "1234"
+          },
+          {
+            "repoName": "app-config-production",
+            "fileName": "play-authorisation.yaml",
+            "commitId": "5678"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "applicationName": "service-dependencies",
+    "versions": [
+      {
+        "environment": "staging",
+        "versionNumber": "1.119.0",
+        "lastDeployed": "1969-12-28T00:00:00Z",
+        "deploymentId": "7",
+        "config": [
+          {
+            "repoName": "app-config-common",
+            "fileName": "staging-microservice-common.yaml",
+            "commitId": "1234"
+          },
+          {
+            "repoName": "app-config-staging",
+            "fileName": "service-dependencies.yaml",
+            "commitId": "5678"
+          }
+        ]
+      },
+      {
+        "environment": "production",
+        "versionNumber": "1.118.0",
+        "lastDeployed": "1969-12-28T00:00:00Z",
+        "deploymentId": "8",
+        "config": [
+          {
+            "repoName": "app-config-common",
+            "fileName": "production-microservice-common.yaml",
+            "commitId": "1234"
+          },
+          {
+            "repoName": "app-config-production",
+            "fileName": "service-dependencies.yaml",
+            "commitId": "5678"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "applicationName": "user-details",
+    "versions": [
+      {
+        "environment": "staging",
+        "versionNumber": "6.160.0",
+        "lastDeployed": "2020-06-09T14:18:24Z",
+        "deploymentId": "9",
+        "config": [
+          {
+            "repoName": "app-config-common",
+            "fileName": "staging-microservice-common.yaml",
+            "commitId": "1234"
+          },
+          {
+            "repoName": "app-config-staging",
+            "fileName": "user-details.yaml",
+            "commitId": "5678"
+          }
+        ]
+      },
+      {
+        "environment": "production",
+        "versionNumber": "6.159.0",
+        "lastDeployed": "2020-06-09T14:18:24Z",
+        "deploymentId": "10",
+        "config": [
+          {
+            "repoName": "app-config-common",
+            "fileName": "production-microservice-common.yaml",
+            "commitId": "1234"
+          },
+          {
+            "repoName": "app-config-production",
+            "fileName": "user-details.yaml",
+            "commitId": "5678"
+          }
+        ]
+      }
+    ]
+  }
+]
