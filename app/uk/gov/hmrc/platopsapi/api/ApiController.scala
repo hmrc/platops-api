@@ -35,6 +35,7 @@ class ApiController @Inject()(
 
   private val prCommenterUrl           = servicesConfig.baseUrl("pr-commenter")
   private val teamsAndRepositoriesUrl  = servicesConfig.baseUrl("teams-and-repositories")
+  private val serviceDependenciesUrl   = servicesConfig.baseUrl("service-dependencies")
   private val releasesApiUrl           = servicesConfig.baseUrl("releases-api")
   private val slackNotificationsUrl    = servicesConfig.baseUrl("slack-notifications")
 
@@ -93,6 +94,11 @@ class ApiController @Inject()(
   def repositories(archived: Option[Boolean]) =
     Action.async { implicit  request =>
       apiConnector.get(url"$teamsAndRepositoriesUrl/api/repositories?archived=$archived")
+    }
+
+  def moduleDependencies(repository: String, version: Option[String]) =
+    Action.async { implicit  request =>
+      apiConnector.get(url"$serviceDependenciesUrl/api/repositories/$repository/module-dependencies?version=$version")
     }
 
   def whatsRunningWhere() =

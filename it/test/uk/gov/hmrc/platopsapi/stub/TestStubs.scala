@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.platopsapi.stub
 
+import cats.Applicative
+import cats.implicits._
 import org.apache.pekko.actor.ActorSystem
 import org.mongodb.scala.MongoClient
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
-import play.api.libs.json.{Json, Reads, __}
+import play.api.libs.json.{JsArray, JsNull, JsObject, JsResult, JsSuccess, JsValue, Json, Reads, __}
 import play.api.libs.ws.{WSClient, WSClientConfig}
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
-import uk.gov.hmrc.platopsapi.ResourceUtil
 import uk.gov.hmrc.platopsapi.ResourceUtil.fromResource
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,13 +34,18 @@ object TestStubs {
   private val teamsAndRepositoriesBaseUrl = "http://localhost:9015"
   private val releasesApiBaseUrl          = "http://localhost:8008"
   private val internalAuthBaseUrl         = "http://localhost:8470"
-  private val dbNames                     = Set("teams-and-repositories", "releases", "internal-auth") // add database name here to check for production data
+  private val serviceConfigsBaseUrl       = "http://localhost:8460"
+  private val serviceDependenciesBaseUrl  = "http://localhost:8459"
+  private val dbNames                     = Set("teams-and-repositories", "releases", "internal-auth", "service-configs", "service-dependencies") // add database name here to check for production data
 
-  private val gitRepositories        = s"$teamsAndRepositoriesBaseUrl/test-only/repos"
-  private val deletedGitRepositories = s"$teamsAndRepositoriesBaseUrl/test-only/deleted-repos"
-  private val teamSummaries          = s"$teamsAndRepositoriesBaseUrl/test-only/team-summaries"
-  private val releaseEvents          = s"$releasesApiBaseUrl/test-only/release-events"
-  private val internalAuthToken      = s"$internalAuthBaseUrl/test-only/token"
+  private val gitRepositories            = s"$teamsAndRepositoriesBaseUrl/test-only/repos"
+  private val deletedGitRepositories     = s"$teamsAndRepositoriesBaseUrl/test-only/deleted-repos"
+  private val teamSummaries              = s"$teamsAndRepositoriesBaseUrl/test-only/team-summaries"
+  private val releaseEvents              = s"$releasesApiBaseUrl/test-only/release-events"
+  private val internalAuthToken          = s"$internalAuthBaseUrl/test-only/token"
+  private val bobbyRules                 = s"$serviceConfigsBaseUrl/test-only/bobbyRules"
+  private val dependenciesLatestVersions = s"$serviceDependenciesBaseUrl/test-only/latestVersions"
+  private val metaArtefacts              = s"$serviceDependenciesBaseUrl/test-only/meta-artefacts"
 
   private val wsClient: WSClient = {
     implicit val as: ActorSystem = ActorSystem("test-actor-system")
@@ -89,7 +95,12 @@ object TestStubs {
         delete(releaseEvents).flatMap(_ => post(releaseEvents, fromResource("/seedCollectionsJson/deploymentEvents.json"))),
         //slack-notifications
         post(internalAuthToken, fromResource("/seedCollectionsJson/slackNotificationsToken.json")),
-        post(internalAuthToken, fromResource("/seedCollectionsJson/slackNotificationsTokenNoPermissions.json"))
+        post(internalAuthToken, fromResource("/seedCollectionsJson/slackNotificationsTokenNoPermissions.json")),
+        //service-configs
+        delete(bobbyRules).flatMap(_ => post(bobbyRules, fromResource("/seedCollectionsJson/defaultBobbyRules.json"))),
+        //service-dependencies
+        delete(dependenciesLatestVersions).flatMap(_ => post(dependenciesLatestVersions, fromResource("/seedCollectionsJson/defaultLatestVersions.json"))),
+        delete(metaArtefacts).flatMap(_ => post(metaArtefacts, transformMetaArtefacts(fromResource("/seedCollectionsJson/defaultMetaArtefacts.json"))))
       )
     )
 
@@ -130,4 +141,76 @@ object TestStubs {
       } yield ()
       , 2.minutes
     )
+
+  // for meta-artefact json, it is easier to maintain an array of dependencies and convert to dependencyGraph
+  private def transformMetaArtefacts(json: String): String =
+    JsArray(
+      Json.parse(json)
+        .as[JsArray]
+        .value
+        .map(_.transform(transformMetaArtefact).fold[JsValue](err => sys.error(s"Invalid metaArtefactJson: $err"), identity))
+    ).toString
+
+
+  private def transformMetaArtefact: Reads[JsValue] =
+    (metaArtefactJson: JsValue) =>
+      for {
+        slugInfoJsObj <- (metaArtefactJson                      ).validate[JsObject]
+        repoName      <- (metaArtefactJson \ "name"             ).validate[String]
+        repoVersion   <- (metaArtefactJson \ "version"          ).validate[String]
+        build         <- (metaArtefactJson \ "dependenciesBuild").validate[List[JsObject]]
+        modules       <- (metaArtefactJson \ "modules"          ).validate[List[JsObject]]
+        modules2      <- modules.traverse(transformMetaArtefactModule(repoVersion))
+      } yield
+        slugInfoJsObj ++
+          Json.obj(
+            "dependenciesBuild" -> JsNull,
+            "dependencyDotBuild" -> generateDependencyGraph(repoName, repoVersion, build),
+            "modules"            -> modules2
+          )
+
+  private def transformMetaArtefactModule(repoVersion: String)(moduleJson: JsValue): JsResult[JsValue] =
+    for {
+      moduleJsObj <- (moduleJson                         ).validate[JsObject]
+      moduleName  <- (moduleJson \ "name"                ).validate[String]
+      compile     <- (moduleJson \ "dependenciesCompile" ).validate[List[JsObject]]
+      provided    <- (moduleJson \ "dependenciesProvided").validate[List[JsObject]]
+      test        <- (moduleJson \ "dependenciesTest"    ).validate[List[JsObject]]
+      it          <- (moduleJson \ "dependenciesIt"      ).validate[List[JsObject]]
+    } yield
+      moduleJsObj ++
+        Json.obj(
+          "dependenciesCompile"   -> JsNull,
+          "dependencyDotCompile"  -> generateDependencyGraph(moduleName, repoVersion, compile),
+          "dependencyDotProvided" -> JsNull,
+          "dependenciesTest"      -> JsNull,
+          "dependencyDotTest"     -> generateDependencyGraph(moduleName, repoVersion, test),
+          "dependencyDotIt"       -> generateDependencyGraph(moduleName, repoVersion, it)
+        )
+
+  private def generateDependencyGraph(rootName: String, rootVersion: String, dependencies: List[JsObject]): String =
+    s"""digraph "dependency-graph" {
+       |  graph[rankdir="LR"]
+       |  edge [
+       |    arrowtail="none"
+       |  ]
+       |  "uk.gov.hmrc:${rootName}:${rootVersion}"[label=<uk.gov.hmrc<BR/><B>${rootName}</B><BR/>${rootVersion}> style=""]
+       |${dependencies.map{dj =>
+           val dependencyGroup   = (dj \ "group"   ).as[String]
+           val dependencyName    = (dj \ "artifact").as[String]
+           val dependencyVersion = (dj \ "version" ).as[String]
+           s"""  "${dependencyGroup}:${dependencyName}:${dependencyVersion}"[label=<${dependencyGroup}<BR/><B>${dependencyName}</B><BR/>${dependencyVersion}> style=""]"""
+         }.mkString("\n")}
+       |}""".stripMargin
+
+  implicit val applicativeJsResult: Applicative[JsResult] =
+    new Applicative[JsResult] {
+      override def pure[A](a: A): JsResult[A] =
+        JsSuccess(a)
+      override def ap[A, B](ff: JsResult[A => B])(fa: JsResult[A]): JsResult[B] =
+        for {
+          f <- ff
+          a <- fa
+        } yield f(a)
+    }
 }

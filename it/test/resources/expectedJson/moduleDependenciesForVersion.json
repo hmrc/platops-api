@@ -1,0 +1,84 @@
+[
+  {
+    "name": "catalogue-frontend",
+    "version": "4.254.0",
+    "dependenciesBuild": [
+      {
+        "name": "sbt",
+        "group": "org.scala-sbt",
+        "currentVersion": {
+          "major": 1,
+          "minor": 4,
+          "patch": 9,
+          "original": "1.4.9"
+        },
+        "latestVersion": {
+          "major": 0,
+          "minor": 13,
+          "patch": 18,
+          "original": "0.13.18"
+        },
+        "bobbyRuleViolations": [],
+        "scope": "build"
+      }
+    ],
+    "modules": [
+      {
+        "name": "catalogue-frontend",
+        "group": "uk.gov.hmrc",
+        "dependenciesCompile": [
+          {
+            "name": "bootstrap-play-26",
+            "group": "uk.gov.hmrc",
+            "currentVersion": {
+              "major": 0,
+              "minor": 36,
+              "patch": 0,
+              "original": "0.36.0"
+            },
+            "bobbyRuleViolations": [],
+            "scope": "compile"
+          },
+          {
+            "name": "play-reactivemongo",
+            "group": "uk.gov.hmrc",
+            "currentVersion": {
+              "major": 5,
+              "minor": 2,
+              "patch": 0,
+              "original": "5.2.0"
+            },
+            "latestVersion": {
+              "major": 6,
+              "minor": 2,
+              "patch": 0,
+              "original": "6.2.0"
+            },
+            "bobbyRuleViolations": [],
+            "scope": "compile"
+          },
+          {
+            "name": "scala-library",
+            "group": "org.scala-lang",
+            "currentVersion": {
+              "major": 2,
+              "minor": 11,
+              "patch": 0,
+              "original": "2.11"
+            },
+            "bobbyRuleViolations": [],
+            "scope": "compile"
+          }
+        ],
+        "dependenciesProvided": [],
+        "dependenciesTest": [],
+        "dependenciesIt": [],
+        "crossScalaVersions": [
+          "2.11"
+        ],
+        "activeBobbyRules": [],
+        "pendingBobbyRules": []
+      }
+    ]
+  }
+]
