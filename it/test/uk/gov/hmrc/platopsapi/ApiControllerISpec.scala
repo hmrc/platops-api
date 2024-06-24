@@ -361,6 +361,41 @@ class ApiControllerISpec
     }
   }
 
+  "GET /api/module-dependencies/:repository" should {
+    "return list of module dependency data for a service" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/api/module-dependencies/catalogue-frontend")
+          .get()
+          .futureValue
+
+      response.status shouldBe 200
+      response.json shouldBe Json.parse(fromResource("/expectedJson/moduleDependencies.json"))
+    }
+
+    "return module dependency data for a specified version of a service" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/api/module-dependencies/catalogue-frontend?version=4.254.0")
+          .get()
+          .futureValue
+
+      response.status shouldBe 200
+      response.json shouldBe Json.parse(fromResource("/expectedJson/moduleDependenciesForVersion.json"))
+    }
+
+    "return module dependency data for the latest version of a service" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/api/module-dependencies/catalogue-frontend?version=latest")
+          .get()
+          .futureValue
+
+      response.status shouldBe 200
+      response.json shouldBe Json.parse(fromResource("/expectedJson/moduleDependenciesForLatestVersion.json"))
+    }
+  }
+
   "GET /api/whats-running-where" should {
     "return a list of what's running where data" in {
       val response =

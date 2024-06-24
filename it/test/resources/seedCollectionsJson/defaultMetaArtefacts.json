@@ -1,0 +1,165 @@
+[
+  {
+    "name"               : "hmrc-mongo",
+    "version"            : "0.57.0",
+    "uri"                : "https://artefacts.tax.service.gov.uk/artifactory/webstore-local/metadata/hmrc-mongo/hmrc-mongo-v0.57.0.meta.tgz",
+    "gitUrl"             : "https://github.com/hmrc/hmrc-mongo.git",
+    "dependenciesBuild"  : [ { "group": "uk.gov.hmrc", "artifact": "sbt-git-versioning_2.11", "version": "0.9.0"} ],
+    "buildInfo" : {
+      "GIT_URL" : "https://github.com/hmrc/hmrc-mongo.git"
+    },
+    "modules"            : [
+      {
+        "name"                 : "hmrc-mongo-common",
+        "sbtVersion"           : "1.4.9",
+        "crossScalaVersions"   : ["2.11"],
+        "dependenciesCompile"  : [],
+        "dependenciesProvided" : [],
+        "dependenciesTest"     : [],
+        "dependenciesIt"       : []
+      },
+      {
+        "name"                 : "hmrc-mongo-play-27",
+        "sbtVersion"           : "1.4.9",
+        "crossScalaVersions"   : ["2.11"],
+        "dependenciesCompile"  : [ { "group": "uk.gov.hmrc.mongo", "artifact": "hmrc-mongo-common_2.11", "version": "0.57.0"} ],
+        "dependenciesProvided" : [],
+        "dependenciesTest"     : [ { "group": "uk.gov.hmrc.mongo", "artifact": "hmrc-mongo-common_2.11", "version": "0.57.0"} ],
+        "dependenciesIt"       : [ { "group": "uk.gov.hmrc.mongo", "artifact": "hmrc-mongo-common_2.11", "version": "0.57.0"} ]
+
+      },
+      {
+        "name"                 : "hmrc-mongo-play-28",
+        "sbtVersion"           : "1.4.9",
+        "crossScalaVersions"   : ["2.11"],
+        "dependenciesCompile"  : [ { "group": "uk.gov.hmrc.mongo", "artifact": "hmrc-mongo-common_2.11", "version": "0.57.0"} ],
+        "dependenciesProvided" : [],
+        "dependenciesTest"     : [ { "group": "uk.gov.hmrc.mongo", "artifact": "hmrc-mongo-common_2.11", "version": "0.57.0"} ],
+        "dependenciesIt"       : [ { "group": "uk.gov.hmrc.mongo", "artifact": "hmrc-mongo-common_2.11", "version": "0.57.0"} ]
+      }
+    ],
+    "created" : "2021-12-03T12:37:14.191Z"
+  },
+  {
+    "name"               : "play-authorisation",
+    "version"            : "0.57.0",
+    "uri"                : "https://artefacts.tax.service.gov.uk/artifactory/webstore-local/metadata/play-authorisation/play-authorisation-v0.57.0.meta.tgz",
+    "gitUrl"             : "https://github.com/hmrc/play-authorisation.git",
+    "dependenciesBuild"  : [ { "group": "uk.gov.hmrc", "artifact": "sbt-git-versioning_2.11", "version": "0.9.0"} ],
+    "buildInfo" : {
+      "GIT_URL" : "https://github.com/hmrc/play-authorisation.git"
+    },
+    "modules"            : [
+      {
+        "name"                 : "play-authorisation",
+        "sbtVersion"           : "1.4.9",
+        "crossScalaVersions"   : ["2.11"],
+        "dependenciesCompile"  : [ { "group": "uk.gov.hmrc", "artifact": "http-verbs-play-25_2.11", "version": "0.6.0"} ],
+        "dependenciesProvided" : [],
+        "dependenciesTest"     : [ { "group": "uk.gov.hmrc", "artifact": "http-verbs-play-25_2.11", "version": "0.6.0"} ],
+        "dependenciesIt"       : [ { "group": "uk.gov.hmrc", "artifact": "http-verbs-play-25_2.11", "version": "0.6.0"} ]
+
+      }
+    ],
+    "created" : "2021-12-03T12:37:14.191Z"
+  },
+  {
+    "name"               : "mobile-auth-stub",
+    "version"            : "0.12.0",
+    "uri"                : "https://artefacts.tax.service.gov.uk/artifactory/webstore-local/metadata/mobile-auth-stub/mobile-auth-stub-v0.12.0.meta.tgz",
+    "gitUrl"             : "https://github.com/hmrc/mobile-auth-stub.git",
+    "dependenciesBuild"  : [],
+    "buildInfo" : {
+      "GIT_URL" : "https://github.com/hmrc/mobile-auth-stub.git"
+    },
+    "modules"            : [
+      {
+        "name"                 : "mobile-auth-stub",
+        "sbtVersion"           : "1.4.9",
+        "crossScalaVersions"   : ["2.11"],
+        "dependenciesCompile"  : [ { "group": "org.slf4j",         "artifact": "slf4j-api",       "version": "1.7.25" },
+                                   { "group": "com.typesafe.play", "artifact": "play-guice_2.11", "version": "2.6.20" } ],
+        "dependenciesProvided" : [],
+        "dependenciesTest"     : [],
+        "dependenciesIt"       : []
+
+      }
+    ],
+    "created": "2019-06-28T11:51:23Z"
+  },
+  {
+    "name"               : "personal-details-validation-frontend",
+    "version"            : "0.30.0",
+    "uri"                : "https://artefacts.tax.service.gov.uk/artifactory/webstore-local/metadata/personal-details-validation-frontend/personal-details-validation-frontend-v0.30.0.meta.tgz",
+    "gitUrl"             : "https://github.com/hmrc/personal-details-validation-frontend.git",
+    "dependenciesBuild"  : [],
+    "buildInfo" : {
+      "GIT_URL" : "https://github.com/hmrc/personal-details-validation-frontend.git"
+    },
+    "modules"            : [
+      {
+        "name"                 : "personal-details-validation-frontend",
+        "sbtVersion"           : "1.4.9",
+        "crossScalaVersions"   : ["2.11"],
+        "dependenciesCompile"  : [ { "group": "org.slf4j",         "artifact": "slf4j-api",         "version": "1.7.25" },
+                                   { "group": "com.typesafe.play", "artifact": "play-logback_2.11", "version": "2.5.12" } ],
+        "dependenciesProvided" : [],
+        "dependenciesTest"     : [],
+        "dependenciesIt"       : []
+
+      }
+    ],
+    "created": "2019-06-28T11:51:23Z"
+  },
+  {
+    "name"               : "catalogue-frontend",
+    "version"            : "4.254.0",
+    "uri"                : "https://artefacts.tax.service.gov.uk/artifactory/webstore-local/metadata/catalogue-frontend/catalogue-frontend-v4.254.0.meta.tgz",
+    "gitUrl"             : "https://github.com/hmrc/catalogue-frontend.git",
+    "dependenciesBuild"  : [],
+    "buildInfo" : {
+      "GIT_URL" : "https://github.com/hmrc/catalogue-frontend.git"
+    },
+    "modules"            : [
+      {
+        "name"                 : "catalogue-frontend",
+        "sbtVersion"           : "1.4.9",
+        "crossScalaVersions"   : ["2.11"],
+        "dependenciesCompile"  : [ { "group": "com.typesafe.play", "artifact": "play-server_2.11"      , "version": "2.6.20" },
+                                   { "group": "uk.gov.hmrc"      , "artifact": "bootstrap-play-26_2.11", "version": "0.36.0" },
+                                   { "group": "uk.gov.hmrc"      , "artifact": "play-reactivemongo"    , "version": "5.2.0"  } ],
+        "dependenciesProvided" : [],
+        "dependenciesTest"     : [],
+        "dependenciesIt"       : []
+
+      }
+    ],
+    "created": "2019-06-28T11:51:23Z"
+  },
+  {
+    "name"               : "catalogue-frontend",
+    "version"            : "4.255.0",
+    "uri"                : "https://artefacts.tax.service.gov.uk/artifactory/webstore-local/metadata/catalogue-frontend/catalogue-frontend-v4.255.0.meta.tgz",
+    "gitUrl"             : "https://github.com/hmrc/catalogue-frontend.git",
+    "dependenciesBuild"  : [ { "group": "com.typesafe.play", "artifact": "sbt-plugin_2.11"          , "version": "2.5.12"        },
+                             { "group": "uk.gov.hmrc"      , "artifact": "sbt-distributables_2.11"  , "version": "1.1.0"         } ],
+    "buildInfo" : {
+      "GIT_URL" : "https://github.com/hmrc/catalogue-frontend.git"
+    },
+    "modules"            : [
+      {
+        "name"                 : "catalogue-frontend",
+        "sbtVersion"           : "1.4.9",
+        "crossScalaVersions"   : ["2.11"],
+        "dependenciesCompile"  : [ { "group": "com.typesafe.play", "artifact": "play-server_2.11"         , "version": "2.6.20"        },
+                                   { "group": "uk.gov.hmrc"      , "artifact": "bootstrap-play-26_2.11"   , "version": "0.36.0"        },
+                                   { "group": "uk.gov.hmrc"      , "artifact": "hmrctest_2.11"            , "version": "3.0.0"         },
+                                   { "group": "uk.gov.hmrc"      , "artifact": "simple-reactivemongo_2.11", "version": "7.0.0-play-26" } ],
+        "dependenciesProvided" : [],
+        "dependenciesTest"     : [ { "group": "uk.gov.hmrc"      , "artifact": "reactivemongo-test_2.11"  , "version": "4.0.0-play-26" } ],
+        "dependenciesIt"       : [ { "group": "uk.gov.hmrc"      , "artifact": "reactivemongo-test_2.11"  , "version": "4.0.0-play-26" } ]
+      }
+    ],
+    "created": "2019-06-28T11:51:23Z"
+  }
+]

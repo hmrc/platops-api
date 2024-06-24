@@ -1,0 +1,240 @@
+[
+  {
+    "name": "catalogue-frontend",
+    "version": "4.255.0",
+    "dependenciesBuild": [
+      {
+        "name": "sbt-plugin",
+        "group": "com.typesafe.play",
+        "currentVersion": {
+          "major": 2,
+          "minor": 5,
+          "patch": 12,
+          "original": "2.5.12"
+        },
+        "latestVersion": {
+          "major": 2,
+          "minor": 6,
+          "patch": 24,
+          "original": "2.6.24"
+        },
+        "bobbyRuleViolations": [
+          {
+            "reason": "Critical security upgrade: [CVE](https://confluence.tools.tax.service.gov.uk/x/sNukC)",
+            "from": "2019-03-04",
+            "range": "(,2.5.19)",
+            "exemptProjects": []
+          }
+        ],
+        "scope": "build"
+      },
+      {
+        "name": "sbt-distributables",
+        "group": "uk.gov.hmrc",
+        "currentVersion": {
+          "major": 1,
+          "minor": 1,
+          "patch": 0,
+          "original": "1.1.0"
+        },
+        "latestVersion": {
+          "major": 1,
+          "minor": 1,
+          "patch": 0,
+          "original": "1.1.0"
+        },
+        "bobbyRuleViolations": [],
+        "scope": "build"
+      },
+      {
+        "name": "sbt",
+        "group": "org.scala-sbt",
+        "currentVersion": {
+          "major": 1,
+          "minor": 4,
+          "patch": 9,
+          "original": "1.4.9"
+        },
+        "latestVersion": {
+          "major": 0,
+          "minor": 13,
+          "patch": 18,
+          "original": "0.13.18"
+        },
+        "bobbyRuleViolations": [],
+        "scope": "build"
+      }
+    ],
+    "modules": [
+      {
+        "name": "catalogue-frontend",
+        "group": "uk.gov.hmrc",
+        "dependenciesCompile": [
+          {
+            "name": "bootstrap-play-26",
+            "group": "uk.gov.hmrc",
+            "currentVersion": {
+              "major": 0,
+              "minor": 36,
+              "patch": 0,
+              "original": "0.36.0"
+            },
+            "bobbyRuleViolations": [],
+            "scope": "compile"
+          },
+          {
+            "name": "hmrctest",
+            "group": "uk.gov.hmrc",
+            "currentVersion": {
+              "major": 3,
+              "minor": 0,
+              "patch": 0,
+              "original": "3.0.0"
+            },
+            "latestVersion": {
+              "major": 3,
+              "minor": 2,
+              "patch": 0,
+              "original": "3.2.0"
+            },
+            "bobbyRuleViolations": [],
+            "scope": "compile"
+          },
+          {
+            "name": "simple-reactivemongo",
+            "group": "uk.gov.hmrc",
+            "currentVersion": {
+              "major": 7,
+              "minor": 0,
+              "patch": 0,
+              "original": "7.0.0-play-26"
+            },
+            "latestVersion": {
+              "major": 7,
+              "minor": 3,
+              "patch": 0,
+              "original": "7.3.0-play-26"
+            },
+            "bobbyRuleViolations": [
+              {
+                "reason": "TEST DEPRECATION",
+                "from": "2050-05-01",
+                "range": "(,99.99.99)",
+                "exemptProjects": []
+              },
+              {
+                "reason": "Uses ReactiveMongo [0.15.0, 0.16.0] which has problems with reconnecting",
+                "from": "2019-02-06",
+                "range": "[7.0.0,7.7.0]",
+                "exemptProjects": []
+              },
+              {
+                "reason": "To allow your app to gracefully handle MongoDB auto-recycling as described [here](https://confluence.tools.tax.service.gov.uk/x/JAbaCw)",
+                "from": "2021-10-01",
+                "range": "(,7.29.0]",
+                "exemptProjects": []
+              }
+            ],
+            "scope": "compile"
+          },
+          {
+            "name": "scala-library",
+            "group": "org.scala-lang",
+            "currentVersion": {
+              "major": 2,
+              "minor": 11,
+              "patch": 0,
+              "original": "2.11"
+            },
+            "bobbyRuleViolations": [],
+            "scope": "compile"
+          }
+        ],
+        "dependenciesProvided": [],
+        "dependenciesTest": [
+          {
+            "name": "reactivemongo-test",
+            "group": "uk.gov.hmrc",
+            "currentVersion": {
+              "major": 4,
+              "minor": 0,
+              "patch": 0,
+              "original": "4.0.0-play-26"
+            },
+            "latestVersion": {
+              "major": 4,
+              "minor": 1,
+              "patch": 0,
+              "original": "4.1.0-play-26"
+            },
+            "bobbyRuleViolations": [
+              {
+                "reason": "Uses ReactiveMongo [0.15.0, 0.16.0] which has problems with reconnecting",
+                "from": "2019-02-06",
+                "range": "[4.0.0,4.4.0]",
+                "exemptProjects": []
+              }
+            ],
+            "scope": "test"
+          },
+          {
+            "name": "scala-library",
+            "group": "org.scala-lang",
+            "currentVersion": {
+              "major": 2,
+              "minor": 11,
+              "patch": 0,
+              "original": "2.11"
+            },
+            "bobbyRuleViolations": [],
+            "scope": "compile"
+          }
+        ],
+        "dependenciesIt": [
+          {
+            "name": "reactivemongo-test",
+            "group": "uk.gov.hmrc",
+            "currentVersion": {
+              "major": 4,
+              "minor": 0,
+              "patch": 0,
+              "original": "4.0.0-play-26"
+            },
+            "latestVersion": {
+              "major": 4,
+              "minor": 1,
+              "patch": 0,
+              "original": "4.1.0-play-26"
+            },
+            "bobbyRuleViolations": [
+              {
+                "reason": "Uses ReactiveMongo [0.15.0, 0.16.0] which has problems with reconnecting",
+                "from": "2019-02-06",
+                "range": "[4.0.0,4.4.0]",
+                "exemptProjects": []
+              }
+            ],
+            "scope": "it"
+          },
+          {
+            "name": "scala-library",
+            "group": "org.scala-lang",
+            "currentVersion": {
+              "major": 2,
+              "minor": 11,
+              "patch": 0,
+              "original": "2.11"
+            },
+            "bobbyRuleViolations": [],
+            "scope": "compile"
+          }
+        ],
+        "crossScalaVersions": [
+          "2.11"
+        ],
+        "activeBobbyRules": [],
+        "pendingBobbyRules": []
+      }
+    ]
+  }
+]
