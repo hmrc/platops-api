@@ -17,6 +17,7 @@
 package uk.gov.hmrc.platopsapi.legacy
 
 import play.api.mvc.ControllerComponents
+import play.api.libs.ws.writeableOf_JsValue
 import uk.gov.hmrc.http.StringContextOps
 import uk.gov.hmrc.platopsapi.api.{ApiConnector, routes}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController

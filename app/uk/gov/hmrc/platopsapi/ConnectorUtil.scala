@@ -17,7 +17,7 @@
 package uk.gov.hmrc.platopsapi
 
 import play.api.http.HttpEntity
-import play.api.http.HeaderNames.CONTENT_TYPE
+import play.api.http.HeaderNames.{CONTENT_TYPE, CONTENT_LENGTH}
 import play.api.mvc.{ResponseHeader, Result}
 
 import uk.gov.hmrc.http.HttpResponse
@@ -26,8 +26,10 @@ object ConnectorUtil {
 
   def toResult[A](rsp: HttpResponse) =
     Result(
-      ResponseHeader(rsp.status, rsp.headers.flatMap { case (k, vs) => vs.map(k -> _) })
-    , HttpEntity.Streamed(rsp.bodyAsSource, None, rsp.header(CONTENT_TYPE))
+      ResponseHeader(
+        rsp.status,
+        (rsp.headers - CONTENT_TYPE - CONTENT_LENGTH).flatMap { (k, vs) => vs.map(k -> _) }
+      )
+    , HttpEntity.Streamed(rsp.bodyAsSource, None, None)
     )
-
 }

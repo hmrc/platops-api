@@ -17,10 +17,12 @@
 package uk.gov.hmrc.platopsapi.stub
 
 import cats.Applicative
-import cats.implicits._
+import cats.implicits.*
 import org.apache.pekko.actor.ActorSystem
 import org.mongodb.scala.MongoClient
+import org.mongodb.scala.ObservableFuture
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
+import play.api.libs.ws.writeableOf_JsValue
 import play.api.libs.json.{JsArray, JsNull, JsObject, JsResult, JsSuccess, JsValue, Json, Reads, __}
 import play.api.libs.ws.{WSClient, WSClientConfig}
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
@@ -62,8 +64,7 @@ object TestStubs {
   private def put(url: String, payload: String): Future[Unit] =
     wsClient
       .url(url)
-      .withHttpHeaders("content-type" -> "application/json")
-      .put(payload)
+      .put(Json.parse(payload))
       .map { response => assert(is2xx(response.status), s"Failed to call stub PUT $url: ${response.body}"); () }
       .recoverWith { case e => Future.failed(new RuntimeException(s"Failed to call stub POST $url: ${e.getMessage}", e)) }
 
@@ -71,8 +72,7 @@ object TestStubs {
   private def post(url: String, payload: String): Future[Unit] =
     wsClient
       .url(url)
-      .withHttpHeaders("content-type" -> "application/json")
-      .post(payload)
+      .post(Json.parse(payload))
       .map { response => assert(is2xx(response.status), s"Failed to call stub POST $url: ${response.body}"); () }
       .recoverWith { case e => Future.failed(new RuntimeException(s"Failed to call stub POST $url: ${e.getMessage}", e)) }
 
