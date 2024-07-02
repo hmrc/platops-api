@@ -39,6 +39,9 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json._
 import play.api.libs.ws.WSClient
+import play.api.libs.ws.writeableOf_JsValue
+import play.api.libs.ws.writableOf_Source
+import play.api.libs.ws.writeableOf_String
 import uk.gov.hmrc.platopsapi.ResourceUtil.fromResource
 
 @DoNotDiscover

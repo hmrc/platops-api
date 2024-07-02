@@ -18,6 +18,7 @@ package uk.gov.hmrc.platopsapi.webhook
 
 import play.api.Configuration
 import play.api.mvc.Result
+import play.api.libs.ws.DefaultBodyWritables.writeableOf_String
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.platopsapi.ConnectorUtil
@@ -40,7 +41,6 @@ class WebhookConnector @Inject()(
       .post(url)
       .setHeader(hc.otherHeaders.find(_._1 == "X-GitHub-Event").toList: _*)
       .setHeader("Authorization" -> internalAuthToken)
-      .setHeader("Content-Type" -> "application/json")
       .withBody(body)
       .execute
       .map(ConnectorUtil.toResult)

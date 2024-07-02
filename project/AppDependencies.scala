@@ -2,7 +2,7 @@ import sbt._
 
 object AppDependencies {
 
-  val bootstrapVersion = "8.1.0"
+  val bootstrapVersion = "9.0.0"
 
   val compile = Seq(
     "uk.gov.hmrc"             %% "bootstrap-backend-play-30"  % bootstrapVersion,
@@ -12,6 +12,6 @@ object AppDependencies {
 
   val test = Seq(
     "uk.gov.hmrc"             %% "bootstrap-test-play-30"     % bootstrapVersion    % Test,
-    "org.mongodb.scala"       %% "mongo-scala-driver"         % "4.8.1"             % Test
+    "org.mongodb.scala"       %% "mongo-scala-driver"         % "5.1.0" cross CrossVersion.for3Use2_13
   )
 }
