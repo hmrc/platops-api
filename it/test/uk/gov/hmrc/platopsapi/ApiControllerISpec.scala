@@ -21,8 +21,9 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.libs.ws.WSClient
+import play.api.libs.ws.writeableOf_JsValue
 import uk.gov.hmrc.platopsapi.ResourceUtil.fromResource
 
 @DoNotDiscover
@@ -96,7 +97,6 @@ class ApiControllerISpec
 
       res.forall(obj => (obj \ "teamNames").as[Seq[String]].contains(team)) shouldBe true
       response.status shouldBe 200
-      res.size        shouldBe 6
       res.head        shouldBe Json.parse(
         """
           |{
@@ -136,7 +136,6 @@ class ApiControllerISpec
       val res = response.json.as[Seq[JsObject]]
 
       response.status shouldBe 200
-      res.size        shouldBe 1
       res.forall(obj => (obj \ "owningTeams").as[Seq[String]].contains(team))
       res.head        shouldBe Json.parse(
         """
@@ -166,6 +165,7 @@ class ApiControllerISpec
           |}
           |""".stripMargin
       )
+      res.size shouldBe 1
     }
 
     "return archived repositories that are backend services with the api tag" in {
@@ -177,7 +177,6 @@ class ApiControllerISpec
       val res = response.json.as[Seq[JsObject]]
 
       response.status shouldBe 200
-      res.size        shouldBe 1
       res.head        shouldBe Json.parse(
         """
           |{
@@ -205,6 +204,7 @@ class ApiControllerISpec
           |}
           |""".stripMargin
       )
+      res.size shouldBe 1
     }
   }
 
@@ -340,7 +340,6 @@ class ApiControllerISpec
       response.status shouldBe 200
 
       val res = response.json.as[Seq[JsObject]]
-      res.size shouldBe 6
       res.forall(obj => (obj \ "isArchived").as[Boolean]) shouldBe false
       res.head shouldBe Json.parse(
         """{
@@ -358,6 +357,7 @@ class ApiControllerISpec
           |}
           |""".stripMargin
       )
+      res.size shouldBe 6
     }
   }
 

@@ -25,7 +25,7 @@ import uk.gov.hmrc.platopsapi.ConnectorUtil
 import java.net.URL
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.reflect.runtime.universe.TypeTag
+import izumi.reflect.Tag
 
 @Singleton
 class ApiConnector @Inject()(httpClientV2: HttpClientV2)(implicit val ec: ExecutionContext) {
@@ -37,7 +37,7 @@ class ApiConnector @Inject()(httpClientV2: HttpClientV2)(implicit val ec: Execut
       .execute
       .map(ConnectorUtil.toResult)
 
-  def post[B : BodyWritable: TypeTag](url: URL, body: B)(implicit hc: HeaderCarrier): Future[Result] =
+  def post[B : BodyWritable: Tag](url: URL, body: B)(implicit hc: HeaderCarrier): Future[Result] =
     httpClientV2
       .post(url)
       .withBody(body)
