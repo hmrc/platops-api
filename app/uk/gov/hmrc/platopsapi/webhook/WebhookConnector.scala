@@ -41,6 +41,7 @@ class WebhookConnector @Inject()(
       .post(url)
       .setHeader(hc.otherHeaders.find(_._1 == "X-GitHub-Event").toList: _*)
       .setHeader("Authorization" -> internalAuthToken)
+      .setHeader("Content-Type" -> "application/json")
       .withBody(body)
       .execute
       .map(ConnectorUtil.toResult)
