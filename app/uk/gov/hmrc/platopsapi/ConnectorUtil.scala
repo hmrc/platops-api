@@ -24,12 +24,12 @@ import uk.gov.hmrc.http.HttpResponse
 
 object ConnectorUtil {
 
-  def toResult[A](rsp: HttpResponse) =
+  def toResult[A](rsp: HttpResponse): Result =
     Result(
       ResponseHeader(
         rsp.status,
         (rsp.headers - CONTENT_TYPE - CONTENT_LENGTH).flatMap { (k, vs) => vs.map(k -> _) }
       )
-    , HttpEntity.Streamed(rsp.bodyAsSource, None, None)
+    , HttpEntity.Streamed(rsp.bodyAsSource, None, rsp.headers.get(CONTENT_TYPE).flatMap(_.headOption))
     )
 }
