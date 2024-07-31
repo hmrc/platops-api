@@ -169,6 +169,102 @@ class LegacyControllerISpec
     }
   }
 
+  "GET /api/teams_with_repositories" should {
+    "return a list of teams and their repositories" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/api/teams_with_repositories")
+          .get()
+          .futureValue
+
+      response.status shouldBe 200
+      response.json   shouldBe Json.parse(fromResource("/expectedJson/teamRepositories.json"))
+    }
+  }
+
+  "GET /api/repositories/:name" should {
+    "return repository details for a repo name" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/api/repositories/repo-2")
+          .get()
+          .futureValue
+
+      response.status shouldBe 200
+      response.json   shouldBe Json.parse(fromResource("/expectedJson/repositoryDetails.json"))
+    }
+  }
+
+  "GET /api/repositories" should {
+    "return all repositories" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/api/repositories")
+          .get()
+          .futureValue
+
+      response.status shouldBe 200
+      response.json   shouldBe Json.parse(fromResource("/expectedJson/repositories.json"))
+    }
+
+    "return only archived repositories" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/api/repositories?archived=true")
+          .get()
+          .futureValue
+
+      response.status shouldBe 200
+      response.json   shouldBe Json.parse(
+        """[
+          |  {
+          |    "name": "repo-1",
+          |    "teamNames": [
+          |      "PlatOps"
+          |    ],
+          |    "createdAt": "2014-03-11T19:59:49Z",
+          |    "lastUpdatedAt": "2020-12-03T12:57:55Z",
+          |    "repoType": "Service",
+          |    "language": "Scala",
+          |    "isArchived": true,
+          |    "defaultBranch": "main",
+          |    "isDeprecated": true
+          |  }
+          |]""".stripMargin
+      )
+    }
+
+    "return only non-archived repositories" in {
+      val response =
+        wsClient
+          .url(s"$baseUrl/api/repositories?archived=false")
+          .get()
+          .futureValue
+
+      response.status shouldBe 200
+
+      val res = response.json.as[Seq[JsObject]]
+      res.forall(obj => (obj \ "isArchived").as[Boolean]) shouldBe false
+      res.head shouldBe Json.parse(
+        """{
+          |  "name": "repo-2",
+          |  "teamNames": [
+          |    "PlatOps"
+          |  ],
+          |  "createdAt": "2014-03-11T19:59:49Z",
+          |  "lastUpdatedAt": "2020-12-03T12:57:55Z",
+          |  "repoType": "Service",
+          |  "language": "Scala",
+          |  "isArchived": false,
+          |  "defaultBranch": "main",
+          |  "isDeprecated": false
+          |}
+          |""".stripMargin
+      )
+      res.size shouldBe 6
+    }
+  }
+
   private val slackMessageBody =
     Json.parse(
     """
