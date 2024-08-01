@@ -83,21 +83,6 @@ class ApiController @Inject()(
       apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/teams")
     }
 
-  def teamsWithRepos() =
-    Action.async { implicit request =>
-      apiConnector.get(url"$teamsAndRepositoriesUrl/api/teams_with_repositories")
-    }
-
-  def repositoryDetails(name: String) =
-    Action.async { implicit  request =>
-      apiConnector.get(url"$teamsAndRepositoriesUrl/api/repositories/$name")
-    }
-
-  def repositories(archived: Option[Boolean]) =
-    Action.async { implicit  request =>
-      apiConnector.get(url"$teamsAndRepositoriesUrl/api/repositories?archived=$archived")
-    }
-
   def moduleDependencies(repository: String, version: Option[String]) =
     Action.async { implicit  request =>
       apiConnector.get(url"$serviceDependenciesUrl/api/repositories/$repository/module-dependencies?version=$version")
