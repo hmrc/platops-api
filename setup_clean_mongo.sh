@@ -5,7 +5,7 @@ mongoContainerName="platops-api-it"
 cwd=$(pwd)
 tmpDir="$cwd/tmp"
 mongodDataDir="$tmpDir/$mongoContainerName/db"
-mongoVersion="5.0"
+mongoVersion="6.0"
 mongoDockerRepositoryPath="percona/percona-server-mongodb"
 platform="multi"
 mongoImage="$mongoDockerRepositoryPath:$mongoVersion-$platform"
@@ -21,6 +21,10 @@ is_listening() {
 
 is_mongo_cmd_available() {
   command -v mongo &> /dev/null;
+}
+
+is_mongosh_cmd_available() {
+  command -v mongosh &> /dev/null;
 }
 
 wait_for_check_for_container_status() {
@@ -98,6 +102,9 @@ setup_private_mongo() {
       if is_mongo_cmd_available; then
         echo "Using local mongo shell to shutdown server"
         mongo --port 27017 --eval "db.getSiblingDB('admin').shutdownServer()"
+      elif is_mongosh_cmd_available; then
+        echo "Using local mongosh shell to shutdown server"
+        mongosh --port 27017 --eval "db.getSiblingDB('admin').shutdownServer()"
       else
         echo "Looking for mongo running in docker"
         local containerInfo=$(docker ps --format '{{.Names}} {{.Ports}}' | grep '27017')
@@ -105,10 +112,9 @@ setup_private_mongo() {
           containerName=$(echo "$containerInfo" | awk '{print $1}')
           echo "Found docker running mongo with the container name '$containerName'"
           docker update --restart no $(docker ps -q |grep -v $containerName) &> /dev/null
-          docker exec "$containerName" mongo --eval "db.getSiblingDB('admin').shutdownServer()"
+          docker exec "$containerName" mongosh --eval "db.getSiblingDB('admin').shutdownServer()"
           sleep 5 #race conditions are hard to prevent
           wait_for_check_for_container_status $containerName false "MongoDB" 27017
-
         else
           echo "No docker container is listening on 27017, exiting with error"
           exit 1
@@ -136,7 +142,9 @@ setup_private_mongo() {
   wait_for_check_for_container_status $mongoContainerName true "MongoDB" 27017
   echo "Initialising the replica set"
 
-  docker exec $mongoContainerName mongo admin --eval "rs.initiate()"
+  docker exec $mongoContainerName mongosh admin --eval "rs.initiate()"
+  docker exec $mongoContainerName mongosh admin --eval "disableTelemetry()"
+
 }
 
 setup_private_mongo

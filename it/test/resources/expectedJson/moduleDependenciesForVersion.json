@@ -19,6 +19,7 @@
           "original": "0.13.18"
         },
         "bobbyRuleViolations": [],
+        "vulnerabilities": [],
         "scope": "build"
       }
     ],
@@ -37,6 +38,7 @@
               "original": "0.36.0"
             },
             "bobbyRuleViolations": [],
+            "vulnerabilities": [],
             "scope": "compile"
           },
           {
@@ -55,6 +57,7 @@
               "original": "6.2.0"
             },
             "bobbyRuleViolations": [],
+            "vulnerabilities": [],
             "scope": "compile"
           },
           {
@@ -67,6 +70,7 @@
               "original": "2.11"
             },
             "bobbyRuleViolations": [],
+            "vulnerabilities": [],
             "scope": "compile"
           }
         ],
