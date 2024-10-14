@@ -6,8 +6,3 @@ GET      /releases-api/whats-running-where/:serviceName            uk.gov.hmrc.p
 POST     /slack-notifications/notification                         uk.gov.hmrc.platopsapi.legacy.LegacyController.sendLegacySlackNotification()
 POST     /slack-notifications/v2/notification                      uk.gov.hmrc.platopsapi.legacy.LegacyController.sendSlackNotification()
 GET      /slack-notifications/v2/:msgId/status                     uk.gov.hmrc.platopsapi.legacy.LegacyController.slackNotificationStatus(msgId: String)
-
-# Teams and Repositories Legacy
-GET      /api/teams_with_repositories                              uk.gov.hmrc.platopsapi.legacy.LegacyController.teamsWithRepos()
-GET      /api/repositories/:name                                   uk.gov.hmrc.platopsapi.legacy.LegacyController.repositoryDetails(name)
-GET      /api/repositories                                         uk.gov.hmrc.platopsapi.legacy.LegacyController.repositories(archived: Option[Boolean])

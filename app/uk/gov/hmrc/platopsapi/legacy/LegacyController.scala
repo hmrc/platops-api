@@ -17,14 +17,13 @@
 package uk.gov.hmrc.platopsapi.legacy
 
 import play.api.Logging
-import play.api.mvc.ControllerComponents
+import play.api.libs.json.*
 import play.api.libs.ws.writeableOf_JsValue
-import play.api.libs.json._
+import play.api.mvc.ControllerComponents
 import uk.gov.hmrc.http.StringContextOps
 import uk.gov.hmrc.platopsapi.api.{ApiConnector, routes}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.http.client.HttpClientV2
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,14 +32,12 @@ import scala.concurrent.{ExecutionContext, Future}
 class LegacyController @Inject()(
   apiConnector  : ApiConnector
 , servicesConfig: ServicesConfig
-, httpClientV2  : HttpClientV2
 , cc            : ControllerComponents
 )(using
   ec: ExecutionContext
 ) extends BackendController(cc) with Logging:
 
   private val slackNotificationsUrl   = servicesConfig.baseUrl("slack-notifications")
-  private val teamsAndRepositoriesUrl = servicesConfig.baseUrl("teams-and-repositories")
 
   def redirectWhatsRunningWhere() =
     Action.async:
@@ -65,77 +62,9 @@ class LegacyController @Inject()(
       implicit request =>
         apiConnector.get(url"$slackNotificationsUrl/slack-notifications/v2/$msgId/status")
 
-  import uk.gov.hmrc.http.HttpReads.Implicits._
-  def teamsWithRepos() =
-    Action.async:
-      implicit request =>
-        given Reads[LegacyController.GitRepository] = LegacyController.GitRepository.reads
-        for
-          repos <- httpClientV2
-                      .get(url"$teamsAndRepositoriesUrl/api/v2/repositories")
-                      .execute[Seq[LegacyController.GitRepository]]
-          json  =  repos
-                      .flatMap(x => x.teamNames.map(t => (t, x)))
-                      .groupBy(_._1)
-                      .map: (teamName, xs) =>
-                        val missing =
-                          LegacyController.RepoType.values.map(_.asString -> JsArray.empty)
-
-                        val found =
-                          xs.map(_._2)
-                            .groupBy(_.repoType)
-                            .map: (repoType, ys) =>
-                              repoType -> JsArray(ys.sortBy(_.name).map(y => JsString(y.name)))
-                            .toSeq
-
-                        JsObject(Seq(
-                          "name"           -> JsString(teamName)
-                        , "createdDate"    -> JsString(xs.map(_._2.createdDate).max.toString)
-                        , "lastActiveDate" -> JsString(xs.map(_._2.lastActiveDate).max.toString)
-                        , "repos"          -> JsObject(missing).deepMerge(JsObject(found))
-                        , "ownedRepos"     -> JsArray:
-                                                xs.map(_._2.name)
-                                                  .sorted
-                                                  .map(JsString.apply)
-                        ))
-        yield Ok(JsArray(json.toSeq))
-
-  def repositories(archived: Option[Boolean]) =
-    Action.async:
-      implicit request =>
-        httpClientV2
-          .get(url"$teamsAndRepositoriesUrl/api/v2/repositories?archived=$archived")
-          .execute[JsArray]
-          .map:
-            _.value.flatMap(json => toLegacy(displayMulti = true, json))
-          .map: xs =>
-            Ok.apply(JsArray.apply(xs))
-
-  def repositoryDetails(name: String) =
-    Action.async:
-      implicit request =>
-        httpClientV2
-          .get(url"""$teamsAndRepositoriesUrl/api/v2/repositories?name="$name"""") // note single quote + escaping would encode the backslash
-          .execute[JsArray]
-          .map:
-            _.value.headOption.flatMap(json => toLegacy(displayMulti = false, json))
-          .map:
-            case Some(json) => Ok.apply(json)
-            case None       => NotFound
-
-  private def toLegacy(displayMulti: Boolean, json: JsValue): Option[JsValue] =
-    import Reads.JsObjectReducer
-    json.transform(
-      if   displayMulti
-      then LegacyController.GitRepository.jsonLegacyMultiTransformer.reduce
-      else LegacyController.GitRepository.jsonLegacySingleTransformer.reduce
-    ) match
-      case JsSuccess(json, _) => Some(json)
-      case JsError(errors   ) => logger.error(s"Unexpected error formatting json: $errors")
-                                 None
-
 object LegacyController:
-  import play.api.libs.functional.syntax._
+  import play.api.libs.functional.syntax.*
+
   import java.time.Instant
 
   enum RepoType(val asString: String):
