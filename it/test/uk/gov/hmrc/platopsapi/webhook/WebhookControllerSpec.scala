@@ -28,7 +28,6 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.test.WireMockSupport
-import uk.gov.hmrc.platopsapi.webhook.WebhookController
 
 class WebhookControllerSpec extends AnyWordSpec
   with Matchers
