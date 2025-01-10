@@ -274,7 +274,7 @@ class ApiControllerISpec
           .futureValue
 
       response.status shouldBe 200
-      response.json shouldBe Json.parse(fromResource("/expectedJson/moduleDependencies.json"))
+      response.json.as[Seq[JsObject]] should contain theSameElementsAs Json.parse(fromResource("/expectedJson/moduleDependencies.json")).as[Seq[JsObject]]
     }
 
     "return module dependency data for a specified version of a service" in {

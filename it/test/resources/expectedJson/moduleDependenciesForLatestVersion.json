@@ -6,6 +6,7 @@
       {
         "name": "sbt-plugin",
         "group": "com.typesafe.play",
+        "scalaVersion": "2.11",
         "currentVersion": {
           "major": 2,
           "minor": 5,
@@ -32,6 +33,7 @@
       {
         "name": "sbt-distributables",
         "group": "uk.gov.hmrc",
+        "scalaVersion": "2.11",
         "currentVersion": {
           "major": 1,
           "minor": 1,
@@ -76,6 +78,7 @@
           {
             "name": "bootstrap-play-26",
             "group": "uk.gov.hmrc",
+            "scalaVersion": "2.11",
             "currentVersion": {
               "major": 0,
               "minor": 36,
@@ -89,6 +92,7 @@
           {
             "name": "hmrctest",
             "group": "uk.gov.hmrc",
+            "scalaVersion": "2.11",
             "currentVersion": {
               "major": 3,
               "minor": 0,
@@ -108,6 +112,7 @@
           {
             "name": "simple-reactivemongo",
             "group": "uk.gov.hmrc",
+            "scalaVersion": "2.11",
             "currentVersion": {
               "major": 7,
               "minor": 0,
@@ -162,6 +167,7 @@
           {
             "name": "reactivemongo-test",
             "group": "uk.gov.hmrc",
+            "scalaVersion": "2.11",
             "currentVersion": {
               "major": 4,
               "minor": 0,
@@ -203,6 +209,7 @@
           {
             "name": "reactivemongo-test",
             "group": "uk.gov.hmrc",
+            "scalaVersion": "2.11",
             "currentVersion": {
               "major": 4,
               "minor": 0,

@@ -31,6 +31,7 @@
           {
             "name": "bootstrap-play-26",
             "group": "uk.gov.hmrc",
+            "scalaVersion": "2.11",
             "currentVersion": {
               "major": 0,
               "minor": 36,
