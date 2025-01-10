@@ -7,6 +7,7 @@ POST     /repositories/:repoName/prs/:prId/comments/buildhook      uk.gov.hmrc.p
 GET      /v2/teams                                                 uk.gov.hmrc.platopsapi.api.ApiController.teams()
 GET      /v2/repositories                                          uk.gov.hmrc.platopsapi.api.ApiController.repositoriesV2(name: Option[String], team: Option[String], owningTeam: Option[String], archived: Option[Boolean], repoType: Option[String], serviceType: Option[String], tag: Option[List[String]])
 GET      /v2/decommissioned-repositories                           uk.gov.hmrc.platopsapi.api.ApiController.decommissionedRepos(repoType: Option[String])
+GET      /test-jobs                                             uk.gov.hmrc.platopsapi.api.ApiController.testJobs(teamName: Option[String], digitalService: Option[String])
 
 # Service Dependencies
 GET      /module-dependencies/:repository                          uk.gov.hmrc.platopsapi.api.ApiController.moduleDependencies(repository: String, version: Option[String])

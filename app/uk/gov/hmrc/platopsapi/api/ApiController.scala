@@ -78,6 +78,11 @@ class ApiController @Inject()(
     apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/repositories?$queryParams")
   }
 
+  def testJobs(teamName: Option[String], digitalService: Option[String]) =
+    Action.async { implicit request =>
+      apiConnector.get(url"$teamsAndRepositoriesUrl/api/test-jobs?teamName=$teamName&digitalService=$digitalService")
+    }
+
   def teams() =
     Action.async { implicit request =>
       apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/teams")
