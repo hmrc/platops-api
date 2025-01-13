@@ -47,7 +47,7 @@ class WebhookController @Inject()(
   private val teamsAndReposUrl  = url"${servicesConfig.baseUrl("teams-and-repositories")}/teams-and-repositories/webhook"
 
   private val eventMap: Map[WebhookEvent, List[java.net.URL]] = Map(
-    WebhookEvent.Pull       -> List(prCommenterUrl)
+    WebhookEvent.Pull       -> List(prCommenterUrl, teamsAndReposUrl)
   , WebhookEvent.Push       -> List(leakDetectionUrl, serviceConfigsUrl, teamsAndReposUrl)
   , WebhookEvent.Repository -> List(leakDetectionUrl, teamsAndReposUrl)
   , WebhookEvent.Team       -> List(internalAuthUrl, teamsAndReposUrl)
