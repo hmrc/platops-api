@@ -12,7 +12,6 @@ lazy val microservice = Project("platops-api", file("."))
     scalacOptions            +=  "-Wconf:src=routes/.*:s"
 
   )
-  .settings(resolvers += Resolver.jcenterRepo)
   .settings(CodeCoverageSettings.settings: _*)
 
 lazy val it =
