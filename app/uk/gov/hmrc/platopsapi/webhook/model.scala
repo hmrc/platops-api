@@ -16,11 +16,13 @@
 
 package uk.gov.hmrc.platopsapi.webhook
 
+import play.api.libs.functional.syntax.toFunctionalBuilderOps
+import play.api.libs.json.{Format, JsResult, OFormat, Reads, __}
 
 sealed trait WebhookEvent { def asString: String }
 
 // asString matches X-GitHub-Event https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads
-object WebhookEvent {
+object WebhookEvent:
   case object Pull        extends WebhookEvent { val asString = "pull_request"}
   case object Push        extends WebhookEvent { val asString = "push"        }
   case object Repository  extends WebhookEvent { val asString = "repository"  }
@@ -35,4 +37,32 @@ object WebhookEvent {
       case Some(x) => Right(x)
       case None    => Left(s)
     }
-}
+
+  import play.api.libs.json._
+
+  implicit val format: Format[WebhookEvent] = 
+    new Format[WebhookEvent]:
+      override def writes(event: WebhookEvent): JsValue =
+        JsString(event.asString)
+
+      override def reads(json: JsValue): JsResult[WebhookEvent] = 
+        json match
+          case JsString(value) => WebhookEvent.parse(value) match
+                                    case Right(event) => JsSuccess(event)
+                                    case Left(s)      => JsError(s"Unknown WebhookEvent: $s")
+          case other           => JsError(s"Expected string for WebhookEvent, got: $other")
+
+end WebhookEvent
+
+case class GithubWebhookRequest(
+  xGitHubEventHeader: WebhookEvent
+, targetUrl         : String
+, payload           : String
+)
+
+object GithubWebhookRequest:
+  implicit val mongoFormat: OFormat[GithubWebhookRequest] =
+    ( (__ \ "xGitHubEventHeader").format[WebhookEvent]
+    ~ (__ \ "targetUrl"         ).format[String]
+    ~ (__ \ "payload"           ).format[String]
+    )(GithubWebhookRequest.apply, pt => Tuple.fromProductTyped(pt))

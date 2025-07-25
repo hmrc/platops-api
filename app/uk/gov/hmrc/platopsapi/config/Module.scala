@@ -16,12 +16,22 @@
 
 package uk.gov.hmrc.platopsapi.config
 
-import com.google.inject.AbstractModule
+import play.api.{Configuration, Environment, Logging}
+import play.api.inject.{Binding, Module}
+import uk.gov.hmrc.platopsapi.webhook.WebhookStreamRunner
 
-class Module extends AbstractModule {
+class Module extends play.api.inject.Module with Logging:
 
-  override def configure(): Unit = {
+  private def webhookStreamBinder(configuration: Configuration): Seq[Binding[_]] =
+    if configuration.get[Boolean]("webhook-stream.enabled") then
+      logger.info("Webhook stream processing is enabled")
+      Seq(
+        bind[WebhookStreamRunner].toSelf.eagerly()
+      )
+    else
+      logger.warn("Webhook stream processing is disabled")
+      Seq.empty
 
-    bind(classOf[AppConfig]).asEagerSingleton()
-  }
-}
+  override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] =
+    Seq(bind[AppConfig].toSelf.eagerly()) ++
+      webhookStreamBinder(configuration)
