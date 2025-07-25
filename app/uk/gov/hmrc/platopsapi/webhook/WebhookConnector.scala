@@ -16,33 +16,43 @@
 
 package uk.gov.hmrc.platopsapi.webhook
 
-import play.api.Configuration
+import play.api.{Configuration, Logging}
 import play.api.mvc.Result
 import play.api.libs.ws.DefaultBodyWritables.writeableOf_String
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, StringContextOps}
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.platopsapi.ConnectorUtil
 
-import java.net.URL
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class WebhookConnector @Inject()(
-  httpClientV2    : HttpClientV2,
-  config          : Configuration
-)(implicit val ec: ExecutionContext) {
+  httpClientV2: HttpClientV2
+, config      : Configuration
+)(implicit
+  val ec: ExecutionContext
+)
+  extends Logging:
+
   import HttpReads.Implicits.readRaw
 
   private val internalAuthToken: String = config.get[String]("internal-auth.token")
 
-  def webhook(url: URL, body: String)(implicit hc: HeaderCarrier): Future[Result] =
+  def webhook(
+    url               : String
+  , body              : String
+  , xGithubEventHeader: WebhookEvent
+  )(implicit hc: HeaderCarrier): Future[Result] =
     httpClientV2
-      .post(url)
-      .setHeader(hc.otherHeaders.find(_._1 == "X-GitHub-Event").toList: _*)
+      .post(url"$url")
+      .setHeader("X-GitHub-Event" -> xGithubEventHeader.asString)
       .setHeader("Authorization" -> internalAuthToken)
       .setHeader("Content-Type" -> "application/json")
       .withBody(body)
       .execute
-      .map(ConnectorUtil.toResult)
-}
+      .map{ res => Thread.sleep(2000); ConnectorUtil.toResult(res)}
+      .recoverWith:
+        case ex =>
+          logger.error(s"Exception occurred while forwarding webhook $xGithubEventHeader to $url", ex)
+          Future.failed(ex)

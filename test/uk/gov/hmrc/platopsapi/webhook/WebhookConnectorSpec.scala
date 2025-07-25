@@ -31,9 +31,9 @@ class WebhookConnectorSpec extends AnyWordSpec
   with ScalaFutures
   with IntegrationPatience
   with WireMockSupport
-  with HttpClientV2Support {
+  with HttpClientV2Support:
 
-  "WebhookConnectorSpec" should {
+  "WebhookConnectorSpec" should:
 
     def stubbedResponse() = stubFor(
       post(urlEqualTo("/webhook"))
@@ -45,44 +45,22 @@ class WebhookConnectorSpec extends AnyWordSpec
 
     val onTest = new WebhookConnector(httpClientV2, Configuration("internal-auth.token" -> "token"))
 
-    "pass provided body and github event header to webhook request" in {
+    "pass provided body and github event header to webhook request" in:
       stubbedResponse()
-
-      val hc = new HeaderCarrier(otherHeaders = Seq(("X-GitHub-Event", "push")))
-      onTest.webhook(url"${wireMockUrl}/webhook", """{"some": "value"}""")(hc).futureValue
-
+      onTest.webhook(s"$wireMockUrl/webhook", """{"some": "value"}""", WebhookEvent.Push)(HeaderCarrier()).futureValue
       verify(
         postRequestedFor(urlEqualTo("/webhook"))
           .withRequestBody(equalToJson("""{"some": "value"}"""))
           .withHeader("X-GitHub-Event", equalTo("push"))
           .withHeader("Authorization", equalTo("token"))
       )
-    }
 
-    "not pass github event header if one is not provided in the hc" in {
+    "not pass github signature header to webhook request" in:
       stubbedResponse()
-
-      val hc = new HeaderCarrier()
-      onTest.webhook(url"${wireMockUrl}/webhook", """{"some": "value"}""")(hc).futureValue
-
-      verify(
-        postRequestedFor(urlEqualTo("/webhook"))
-          .withRequestBody(equalToJson("""{"some": "value"}"""))
-          .withoutHeader("X-GitHub-Event")
-      )
-    }
-
-    "not pass github signature header to webhook request" in {
-      stubbedResponse()
-
       val hc = new HeaderCarrier(otherHeaders = Seq(("X-Hub-Signature-256", "aaa111")))
-      onTest.webhook(url"${wireMockUrl}/webhook", """{"some": "value"}""")(hc).futureValue
-
+      onTest.webhook(s"$wireMockUrl/webhook", """{"some": "value"}""", WebhookEvent.Push)(hc).futureValue
       verify(
         postRequestedFor(urlEqualTo("/webhook"))
           .withRequestBody(equalToJson("""{"some": "value"}"""))
           .withoutHeader("X-Hub-Signature-256")
       )
-    }
-  }
-}

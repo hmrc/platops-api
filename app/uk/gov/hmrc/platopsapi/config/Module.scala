@@ -17,11 +17,14 @@
 package uk.gov.hmrc.platopsapi.config
 
 import com.google.inject.AbstractModule
+import play.api.libs.concurrent.PekkoGuiceSupport
+import uk.gov.hmrc.platopsapi.webhook.WebhookStreamRunner
 
-class Module extends AbstractModule {
+class Module extends AbstractModule with PekkoGuiceSupport {
 
   override def configure(): Unit = {
 
     bind(classOf[AppConfig]).asEagerSingleton()
+    //bind(classOf[WebhookStreamRunner]).asEagerSingleton()
   }
 }
