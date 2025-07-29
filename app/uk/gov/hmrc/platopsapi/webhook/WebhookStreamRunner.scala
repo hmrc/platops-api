@@ -72,8 +72,7 @@ class WebhookStreamRunner @Inject()(
       .andThen:
         case Failure(ex) => logger.warn(s"Webhook stream failed: ${ex.getMessage} - restarting")
                             webhookStream(tickSource)
-
-
+  
   private def forwardWorkGithubRequest(item: GithubWebhookRequest): Future[Unit] =
     logger.info(s"Forwarding github webhook: ${item.xGitHubEventHeader.asString} to ${item.targetUrl}")
     webhookConnector

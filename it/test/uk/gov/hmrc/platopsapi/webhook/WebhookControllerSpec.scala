@@ -17,7 +17,6 @@
 package uk.gov.hmrc.platopsapi.webhook
 
 import org.apache.pekko.stream.Materializer
-import com.github.tomakehurst.wiremock.client.WireMock._
 import org.apache.commons.codec.digest.{HmacAlgorithms, HmacUtils}
 import org.apache.pekko.util.Timeout
 import org.scalatest.matchers.should.Matchers
@@ -32,10 +31,9 @@ import uk.gov.hmrc.http.test.WireMockSupport
 class WebhookControllerSpec extends AnyWordSpec
   with Matchers
   with WireMockSupport
-  with GuiceOneAppPerSuite {
+  with GuiceOneAppPerSuite:
 
   implicit val timout: Timeout = Helpers.defaultAwaitTimeout
-
   private val webhookSecretKey = "1234"
 
   override lazy val app: Application = new GuiceApplicationBuilder()
@@ -53,126 +51,48 @@ class WebhookControllerSpec extends AnyWordSpec
       "microservice.services.teams-and-repositories.port" -> wireMockPort
     ).build()
 
-  private val controller = app.injector.instanceOf[WebhookController]
+  private val controller         = app.injector.instanceOf[WebhookController]
   implicit val mat: Materializer = app.injector.instanceOf[Materializer]
 
-  "WebhookController" should {
-    "process a pull request" in {
+  "WebhookController" should:
+    "process a pull request" in:
       val eventType   = "pull_request"
       val payload     = """{"foo":"bar"}"""
       val ghSignature = "sha256=" + new HmacUtils(HmacAlgorithms.HMAC_SHA_256, webhookSecretKey).hmacHex(payload)
+      val result      = controller.processGithubWebhook()(
+                          FakeRequest("POST", "/webhook")
+                            .withHeaders(
+                              "X-GitHub-Event"      -> eventType,
+                              "X-Hub-Signature-256" -> ghSignature
+                            ).withBody(payload)
+                        )
+      Helpers.status(result)        shouldBe Helpers.ACCEPTED
+      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Event type 'pull_request' stored for processing")
 
-      stubFor(
-        post(urlEqualTo("/pr-commenter/webhook"))
-          .withHeader("X-GitHub-Event", equalTo(eventType))
-          .willReturn(aResponse().withStatus(200)))
-
-      stubFor(
-        post(urlEqualTo("/teams-and-repositories/webhook"))
-          .withHeader("X-GitHub-Event", equalTo(eventType))
-          .willReturn(aResponse().withStatus(202)))
-      
-      val result = controller.processGithubWebhook()(
-        FakeRequest("POST", "/webhook")
-          .withHeaders(
-            "X-GitHub-Event"      -> eventType,
-            "X-Hub-Signature-256" -> ghSignature
-          ).withBody(payload)
-      )
-      Helpers.status(result)        shouldBe Helpers.OK
-      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Event type 'pull_request' processing")
-
-      verify(
-        postRequestedFor(urlEqualTo("/pr-commenter/webhook"))
-          .withHeader("X-GitHub-Event", equalTo(eventType))
-          .withRequestBody(equalToJson(payload)))
-
-      verify(
-        postRequestedFor(urlEqualTo("/teams-and-repositories/webhook"))
-          .withHeader("X-GitHub-Event", equalTo(eventType))
-          .withRequestBody(equalToJson(payload)))
-    }
-
-    "process a push" in {
+    "process a push" in:
       val eventType   = "push"
       val payload     = """{"foo":"bar"}"""
       val ghSignature = "sha256=" + new HmacUtils(HmacAlgorithms.HMAC_SHA_256, webhookSecretKey).hmacHex(payload)
+      val result      = controller.processGithubWebhook()(
+                         FakeRequest("POST", "/webhook")
+                           .withHeaders(
+                             "X-GitHub-Event"      -> eventType,
+                             "X-Hub-Signature-256" -> ghSignature
+                           ).withBody(payload)
+                       )
+      Helpers.status(result)        shouldBe Helpers.ACCEPTED
+      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Event type 'push' stored for processing")
 
-      stubFor(
-        post(urlEqualTo("/leak-detection/validate"))
-          .withHeader("X-GitHub-Event", equalTo(eventType))
-          .willReturn(aResponse().withStatus(200)))
-
-      stubFor(
-        post(urlEqualTo("/service-configs/webhook"))
-          .withHeader("X-GitHub-Event", equalTo(eventType))
-          .willReturn(aResponse().withStatus(202)))
-
-      stubFor(
-        post(urlEqualTo("/teams-and-repositories/webhook"))
-          .withHeader("X-GitHub-Event", equalTo(eventType))
-          .willReturn(aResponse().withStatus(202)))
-
-      val result = controller.processGithubWebhook()(
-        FakeRequest("POST", "/webhook")
-          .withHeaders(
-            "X-GitHub-Event"      -> eventType,
-            "X-Hub-Signature-256" -> ghSignature
-          ).withBody(payload)
-      )
-      Helpers.status(result)        shouldBe Helpers.OK
-      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Event type 'push' processing")
-
-      verify(
-        postRequestedFor(urlEqualTo("/leak-detection/validate"))
-          .withHeader("X-GitHub-Event", equalTo(eventType))
-          .withRequestBody(equalToJson(payload)))
-
-      verify(
-        postRequestedFor(urlEqualTo("/service-configs/webhook"))
-          .withHeader("X-GitHub-Event", equalTo(eventType))
-          .withRequestBody(equalToJson(payload)))
-
-      verify(
-        postRequestedFor(urlEqualTo("/teams-and-repositories/webhook"))
-          .withHeader("X-GitHub-Event", equalTo(eventType))
-          .withRequestBody(equalToJson(payload)))
-    }
-
-    "process a repository" in {
+    "process a repository" in:
       val eventType   = "repository"
       val payload     = """{"foo":"bar"}"""
       val ghSignature = "sha256=" + new HmacUtils(HmacAlgorithms.HMAC_SHA_256, webhookSecretKey).hmacHex(payload)
-
-      stubFor(
-        post(urlEqualTo("/leak-detection/validate"))
-          .withHeader("X-GitHub-Event", equalTo(eventType))
-          .willReturn(aResponse().withStatus(200)))
-
-      stubFor(
-        post(urlEqualTo("/teams-and-repositories/webhook"))
-          .withHeader("X-GitHub-Event", equalTo(eventType))
-          .willReturn(aResponse().withStatus(202)))
-
-      val result = controller.processGithubWebhook()(
-        FakeRequest("POST", "/webhook")
-          .withHeaders(
-            "X-GitHub-Event"      -> eventType,
-            "X-Hub-Signature-256" -> ghSignature
-          ).withBody(payload)
-      )
-      Helpers.status(result)        shouldBe Helpers.OK
-      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Event type 'repository' processing")
-
-      verify(
-        postRequestedFor(urlEqualTo("/leak-detection/validate"))
-          .withHeader("X-GitHub-Event", equalTo(eventType))
-          .withRequestBody(equalToJson(payload)))
-
-      verify(
-        postRequestedFor(urlEqualTo("/teams-and-repositories/webhook"))
-          .withHeader("X-GitHub-Event", equalTo(eventType))
-          .withRequestBody(equalToJson(payload)))
-    }
-  }
-}
+      val result      = controller.processGithubWebhook()(
+                          FakeRequest("POST", "/webhook")
+                            .withHeaders(
+                              "X-GitHub-Event"      -> eventType,
+                              "X-Hub-Signature-256" -> ghSignature
+                            ).withBody(payload)
+                        )
+      Helpers.status(result)        shouldBe Helpers.ACCEPTED
+      Helpers.contentAsJson(result) shouldBe Json.obj("details" -> "Event type 'repository' stored for processing")

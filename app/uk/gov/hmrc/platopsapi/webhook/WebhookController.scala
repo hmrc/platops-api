@@ -85,7 +85,7 @@ class WebhookController @Inject()(
                                              )
                                            )
                                       .map: _ =>
-                                        Accepted(details(s"Event '${event.asString}' stored for async processing"))
+                                        Accepted(details(s"Event type '${event.asString}' stored for processing"))
           case Some(Left(other))  => logger.warn(s"Bad request X-GitHub-Event not supported $other")
                                      Future.successful(BadRequest(details("Invalid event type")))
           case None               => logger.warn(s"Bad request X-GitHub-Event not specified")
