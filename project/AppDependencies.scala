@@ -2,11 +2,11 @@ import sbt._
 
 object AppDependencies {
 
-  val bootstrapVersion = "9.16.0"
+  val bootstrapVersion = "9.19.0"
 
   val compile = Seq(
     "uk.gov.hmrc"             %% "bootstrap-backend-play-30"  % bootstrapVersion,
-    "org.typelevel"           %% "cats-core"                  % "2.10.0",
+    "org.typelevel"           %% "cats-core"                  % "2.13.0",
     "commons-codec"           %  "commons-codec"              % "1.15"
   )
 
