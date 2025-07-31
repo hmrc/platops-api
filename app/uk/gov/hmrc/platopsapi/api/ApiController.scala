@@ -33,27 +33,27 @@ class ApiController @Inject()(
   apiConnector  : ApiConnector,
   servicesConfig: ServicesConfig,
   cc            : ControllerComponents
-) extends BackendController(cc) {
+) extends BackendController(cc):
 
-  private val prCommenterUrl           = servicesConfig.baseUrl("pr-commenter")
-  private val teamsAndRepositoriesUrl  = servicesConfig.baseUrl("teams-and-repositories")
-  private val serviceDependenciesUrl   = servicesConfig.baseUrl("service-dependencies")
-  private val releasesApiUrl           = servicesConfig.baseUrl("releases-api")
-  private val slackNotificationsUrl    = servicesConfig.baseUrl("slack-notifications")
+  private val prCommenterUrl          = servicesConfig.baseUrl("pr-commenter")
+  private val teamsAndRepositoriesUrl = servicesConfig.baseUrl("teams-and-repositories")
+  private val serviceDependenciesUrl  = servicesConfig.baseUrl("service-dependencies")
+  private val releasesApiUrl          = servicesConfig.baseUrl("releases-api")
+  private val slackNotificationsUrl   = servicesConfig.baseUrl("slack-notifications")
 
-  private def streamParser: BodyParser[Source[ByteString, _]] = BodyParser { _ =>
-    Accumulator.source[ByteString].map(Right.apply)(cc.executionContext)
-  }
+  private def streamParser: BodyParser[Source[ByteString, _]] =
+    BodyParser: _ =>
+      Accumulator.source[ByteString].map(Right.apply)(cc.executionContext)
 
   def prCommenterBuildhook(repoName: String, prId: Long) =
-    Action.async(streamParser) { implicit request =>
-      apiConnector.post(url"$prCommenterUrl/pr-commenter/repositories/$repoName/prs/$prId/comments/buildhook", request.body)
-    }
+    Action.async(streamParser):
+      implicit request =>
+        apiConnector.post(url"$prCommenterUrl/pr-commenter/repositories/$repoName/prs/$prId/comments/buildhook", request.body)
 
   def decommissionedRepos(repoType: Option[String] = None) =
-    Action.async { implicit request =>
-      apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/decommissioned-repositories?repoType=$repoType")
-    }
+    Action.async:
+      implicit request =>
+        apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/decommissioned-repositories?repoType=$repoType")
 
   def repositoriesV2(
     name       : Option[String],
@@ -63,59 +63,57 @@ class ApiController @Inject()(
     repoType   : Option[String],
     serviceType: Option[String],
     tag        : Option[List[String]]
-  ) = Action.async { implicit request =>
+  ) = Action.async:
+    implicit request =>
+      val queryParams = Seq(
+        name.map("name" -> _)
+      , team.map("team" -> _)
+      , owningTeam.map("owningTeam" -> _)
+      , archived.map("archived" -> _.toString)
+      , repoType.map("repoType" -> _)
+      , serviceType.map("serviceType" -> _)
+      ).flatten ++
+        tag.getOrElse(Seq.empty).map("tag" -> _)
 
-    val queryParams = Seq(
-      name.map("name" -> _)
-    , team.map("team" -> _)
-    , owningTeam.map("owningTeam" -> _)
-    , archived.map("archived" -> _.toString)
-    , repoType.map("repoType" -> _)
-    , serviceType.map("serviceType" -> _)
-    ).flatten ++
-      tag.getOrElse(Seq.empty).map("tag" -> _)
-
-    apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/repositories?$queryParams")
-  }
+      apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/repositories?$queryParams")
 
   def testJobs(teamName: Option[String], digitalService: Option[String]) =
-    Action.async { implicit request =>
-      apiConnector.get(url"$teamsAndRepositoriesUrl/api/test-jobs?teamName=$teamName&digitalService=$digitalService")
-    }
+    Action.async:
+      implicit request =>
+        apiConnector.get(url"$teamsAndRepositoriesUrl/api/test-jobs?teamName=$teamName&digitalService=$digitalService")
 
   def teams() =
-    Action.async { implicit request =>
-      apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/teams")
-    }
+    Action.async:
+      implicit request =>
+        apiConnector.get(url"$teamsAndRepositoriesUrl/api/v2/teams")
 
-  def moduleDependencies(repository: String, version: Option[String]) =
-    Action.async { implicit  request =>
-      apiConnector.get(url"$serviceDependenciesUrl/api/repositories/$repository/module-dependencies?version=$version")
-    }
+  def latestRepositoryVersion(repoName: String) =
+    Action.async:
+      implicit request =>
+        apiConnector.get(url"$serviceDependenciesUrl/api/repositories/$repoName/latest-version")
 
   def whatsRunningWhere() =
-    Action.async { implicit request =>
-      apiConnector.get(url"$releasesApiUrl/releases-api/whats-running-where")
-    }
+    Action.async:
+      implicit request =>
+        apiConnector.get(url"$releasesApiUrl/releases-api/whats-running-where")
 
   def whatsRunningWhereForService(serviceName: String) =
-    Action.async { implicit request =>
-      apiConnector.get(url"$releasesApiUrl/releases-api/whats-running-where/$serviceName")
-    }
+    Action.async:
+      implicit request =>
+        apiConnector.get(url"$releasesApiUrl/releases-api/whats-running-where/$serviceName")
 
   @deprecated("Use sendSlackNotification instead. Will be removed on 01/09/2025")
   def sendLegacySlackNotification() =
-    Action.async(parse.json) { implicit  request =>
-      apiConnector.post(url"$slackNotificationsUrl/slack-notifications/notification", request.body)
-    }
+    Action.async(parse.json):
+      implicit request =>
+        apiConnector.post(url"$slackNotificationsUrl/slack-notifications/notification", request.body)
 
   def sendSlackNotification() =
-    Action.async(parse.json) { implicit  request =>
-      apiConnector.post(url"$slackNotificationsUrl/slack-notifications/v2/notification", request.body)
-    }
+    Action.async(parse.json):
+      implicit request =>
+        apiConnector.post(url"$slackNotificationsUrl/slack-notifications/v2/notification", request.body)
 
   def slackNotificationStatus(msgId: String) =
-    Action.async { implicit request =>
-      apiConnector.get(url"$slackNotificationsUrl/slack-notifications/v2/$msgId/status")
-    }
-}
+    Action.async:
+      implicit request =>
+        apiConnector.get(url"$slackNotificationsUrl/slack-notifications/v2/$msgId/status")
