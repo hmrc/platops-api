@@ -43,11 +43,12 @@ class WebhookStreamRunner @Inject()(
   private val initialDelay: FiniteDuration = config.get[Duration]("webhook-stream.source-tick.initialDelay").toMillis.millis
   private val interval    : FiniteDuration = config.get[Duration]("webhook-stream.source-tick.interval"    ).toMillis.millis
 
-  if   config.get[Boolean]("webhook-stream.enabled")
-  then webhookStream(Source.tick(initialDelay = initialDelay, interval = interval, tick = ()))
+  if   config.get[Boolean]("webhook-stream.enabled") then
+       run(Source.tick(initialDelay = initialDelay, interval = interval, tick = ()))
        logger.info("Started webhook stream")
+  else logger.warn("Webhook stream is disabled")
 
-  def webhookStream(tickSource: Source[Unit, _]): Future[Done] =
+  def run(tickSource: Source[Unit, _]): Future[Done] =
     tickSource
       .flatMapConcat: _ =>
         Source.unfoldAsync(()): _ =>
@@ -71,8 +72,8 @@ class WebhookStreamRunner @Inject()(
       .runWith(Sink.ignore)
       .andThen:
         case Failure(ex) => logger.warn(s"Webhook stream failed: ${ex.getMessage} - restarting")
-                            webhookStream(tickSource)
-  
+                            run(tickSource)
+
   private def forwardWorkGithubRequest(item: GithubWebhookRequest): Future[Unit] =
     logger.info(s"Forwarding github webhook: ${item.xGitHubEventHeader.asString} to ${item.targetUrl}")
     webhookConnector
@@ -80,7 +81,7 @@ class WebhookStreamRunner @Inject()(
       .map(_ => ())
 
   private def processingStatusFailedLog(wi: WorkItem[GithubWebhookRequest]): String =
-    s"Failed to forward webhook due to timeouts - X-Github-Event: ${wi.item.xGitHubEventHeader}, target url: ${wi.item.targetUrl}, retry count: ${wi.failureCount}, retry in: ${config.getMillis("queue.retryAfter") / 1000} seconds"
+    s"Failed to forward webhook due to timeouts - X-Github-Event: ${wi.item.xGitHubEventHeader}, target url: ${wi.item.targetUrl}, retry count: ${wi.failureCount}, retry in: ${config.getMillis("queue.retryInterval") / 1000} seconds"
 
   private def processingStatusPermanentlyFailedLog(wi: WorkItem[GithubWebhookRequest]): String =
     s"Failed to forward webhook due to timeouts and marked as permanently failed - X-Github-Event: ${wi.item.xGitHubEventHeader}, target url: ${wi.item.targetUrl}, retry count: ${wi.failureCount}"

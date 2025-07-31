@@ -26,9 +26,11 @@ import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 import uk.gov.hmrc.mongo.workitem.{ProcessingStatus, WorkItem}
 import org.mongodb.scala.ObservableFuture
 import uk.gov.hmrc.platopsapi.webhook.WebhookEvent
+
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.FiniteDuration
 
 class GithubRequestsQueueRepositorySpec
   extends AnyWordSpec
@@ -40,15 +42,16 @@ class GithubRequestsQueueRepositorySpec
 
   val githubWebhookRequest: GithubWebhookRequest          = GithubWebhookRequest(WebhookEvent.Repository, "", "")
   val anInstant           : Instant                       = Instant.now().truncatedTo(ChronoUnit.MILLIS)
-  val repository          : GithubRequestsQueueRepository = new GithubRequestsQueueRepository(Configuration.load(Environment.simple()), mongoComponent):
+  val config              : Configuration                 = Configuration.load(Environment.simple())
+  val repository          : GithubRequestsQueueRepository = new GithubRequestsQueueRepository(config, mongoComponent):
                                                               override def now(): Instant = anInstant
 
   "The github request queue repository" should:
     "ensure indexes are created" in:
-      repository.collection.listIndexes().toFuture().futureValue.size shouldBe 4
+      repository.collection.listIndexes().toFuture().futureValue.size shouldBe 5
 
     "pullOutstanding should return eligible work items" in:
-      val workItemId = repository.pushNew(githubWebhookRequest, anInstant.minusMillis(repository.retryIntervalMillis + 100)).futureValue.id
+      val workItemId = repository.pushNew(githubWebhookRequest, anInstant.minusMillis(repository.retryInterval.toMillis + 100)).futureValue.id
       val pulledItem = repository.pullOutstanding.futureValue
       pulledItem.map(_.id) should contain(workItemId)
 
@@ -70,3 +73,13 @@ class GithubRequestsQueueRepositorySpec
       , Symbol("receivedAt") (anInstant)
       , Symbol("updatedAt" ) (anInstant)
       )
+
+    "delete documents based on updatedAt time to live index" in:
+      val ttl     = config.get[FiniteDuration]("queue.ttl").toSeconds
+      val indexes = repository.collection.listIndexes().toFuture().futureValue
+      
+      val optTTL  = indexes.find: idx =>
+                      idx.get("name").exists(_.asString().getValue == "updatedAt-ttl-idx")
+
+      optTTL shouldBe defined
+      optTTL.flatMap(_.get("expireAfterSeconds")).map(_.asInt32().getValue) shouldBe Some(ttl)

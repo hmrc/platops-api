@@ -20,9 +20,12 @@ import play.api.Configuration
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.workitem.{WorkItem, WorkItemFields, WorkItemRepository}
 import uk.gov.hmrc.platopsapi.webhook.GithubWebhookRequest
+import org.mongodb.scala.model.*
 
 import java.time.{Duration, Instant}
+import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -36,21 +39,25 @@ class GithubRequestsQueueRepository @Inject()(
 , mongoComponent = mongoComponent
 , itemFormat     = GithubWebhookRequest.mongoFormat
 , workItemFields = WorkItemFields.default
+, extraIndexes   = Seq(
+                     IndexModel(
+                       Indexes.ascending("updatedAt")
+                     , IndexOptions()
+                         .name("updatedAt-ttl-idx")
+                         .expireAfter(configuration.get[FiniteDuration]("queue.ttl").toSeconds, TimeUnit.SECONDS)
+                     )
+                   )
 ):
-
-  override lazy val requiresTtlIndex: Boolean = false
-  
   override def now(): Instant =
     Instant.now()
-
-  lazy val retryIntervalMillis: Long =
-    configuration.getMillis("queue.retryAfter")
-
+  
+  lazy val retryInterval = configuration.get[FiniteDuration]("queue.retryInterval")
+   
   override val inProgressRetryAfter: Duration =
-    Duration.ofMillis(retryIntervalMillis)
-
+     Duration.ofMillis(retryInterval.toMillis)
+  
   def pullOutstanding: Future[Option[WorkItem[GithubWebhookRequest]]] =
     super.pullOutstanding(
-      failedBefore    = now().minusMillis(retryIntervalMillis.toInt),
+      failedBefore    = now().minusMillis(retryInterval.toMillis),
       availableBefore = now()
     )

@@ -47,12 +47,12 @@ class WebhookConnector @Inject()(
     httpClientV2
       .post(url"$url")
       .setHeader("X-GitHub-Event" -> xGithubEventHeader.asString)
-      .setHeader("Authorization" -> internalAuthToken)
-      .setHeader("Content-Type" -> "application/json")
+      .setHeader("Authorization"  -> internalAuthToken          )
+      .setHeader("Content-Type"   -> "application/json"         )
       .withBody(body)
       .execute
-      .map{ res => Thread.sleep(2000); ConnectorUtil.toResult(res)}
+      .map(ConnectorUtil.toResult)
       .recoverWith:
         case ex =>
-          logger.error(s"Exception occurred while forwarding webhook $xGithubEventHeader to $url", ex)
+          logger.error(s"Exception occurred while forwarding webhook $xGithubEventHeader to $url Reason: ${ex.getMessage}")
           Future.failed(ex)

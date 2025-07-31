@@ -32,7 +32,6 @@ import play.api.mvc.Results.Ok
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.workitem.{ProcessingStatus, WorkItem}
 import uk.gov.hmrc.platopsapi.persistence.GithubRequestsQueueRepository
-import uk.gov.hmrc.platopsapi.webhook.WebhookEvent.Repository
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
 
@@ -62,7 +61,7 @@ class WebhookStreamRunnerSpec
       when(mockConnector.webhook(any[String], any[String], any[WebhookEvent])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Ok))
 
-      onTest.webhookStream(Source.repeat(()).take(2)).futureValue shouldBe Done
+      onTest.run(Source.repeat(()).take(2)).futureValue shouldBe Done
 
       verify(mockRepo     , times(5)).pullOutstanding
       verify(mockRepo     , times(3)).completeAndDelete(workItem.id)
@@ -81,7 +80,7 @@ class WebhookStreamRunnerSpec
       when(mockConnector.webhook(any[String], any[String], any[WebhookEvent])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Ok))
 
-      onTest.webhookStream(Source.single(())).futureValue shouldBe Done
+      onTest.run(Source.single(())).futureValue shouldBe Done
 
       verify(mockRepo     , times(4)).pullOutstanding
       verify(mockRepo     , times(3)).completeAndDelete(workItem.id)
@@ -92,7 +91,7 @@ class WebhookStreamRunnerSpec
         .thenReturn(Future.successful(None))
         .thenReturn(Future.successful(None))
 
-      onTest.webhookStream(Source.repeat(()).take(2)).futureValue shouldBe Done
+      onTest.run(Source.repeat(()).take(2)).futureValue shouldBe Done
 
       verify(mockRepo     , times(2)).pullOutstanding
       verify(mockConnector, never() ).webhook(any[String], any[String], any[WebhookEvent])(any[HeaderCarrier])
@@ -106,7 +105,7 @@ class WebhookStreamRunnerSpec
       when(mockRepo.markAs(any[ObjectId], eqTo(ProcessingStatus.Failed), any[Option[java.time.Instant]]()))
         .thenReturn(Future.successful(()))
 
-      onTest.webhookStream(Source.single(())).futureValue shouldBe Done
+      onTest.run(Source.single(())).futureValue shouldBe Done
 
       verify(mockRepo, times(1)).markAs(workItem.id, ProcessingStatus.Failed)
       verify(mockRepo, never() ).completeAndDelete(any[ObjectId])
@@ -120,7 +119,7 @@ class WebhookStreamRunnerSpec
       when(mockRepo.markAs(any[ObjectId], eqTo(ProcessingStatus.PermanentlyFailed), any[Option[java.time.Instant]]()))
         .thenReturn(Future.successful(()))
 
-      onTest.webhookStream(Source.single(())).futureValue shouldBe Done
+      onTest.run(Source.single(())).futureValue shouldBe Done
 
       verify(mockRepo, times(1)).markAs(workItem.id, ProcessingStatus.PermanentlyFailed)
       verify(mockRepo, never() ).completeAndDelete(any[ObjectId])
@@ -137,7 +136,7 @@ class WebhookStreamRunnerSpec
       when(mockConnector.webhook(any[String], any[String], any[WebhookEvent])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Ok))
 
-      onTest.webhookStream(Source.repeat(()).take(2)).futureValue shouldBe Done
+      onTest.run(Source.repeat(()).take(2)).futureValue shouldBe Done
 
       verify(mockRepo     , times(3)).pullOutstanding
       verify(mockRepo     , times(1)).completeAndDelete(workItem.id)
@@ -154,7 +153,7 @@ class WebhookStreamRunnerSpec
       when(mockConnector.webhook(eqTo(workItem.item.targetUrl), eqTo(workItem.item.payload), eqTo(WebhookEvent.Repository))(any[HeaderCarrier]))
         .thenReturn(Future.successful(Ok))
 
-      onTest.webhookStream(Source.single(())).futureValue shouldBe Done
+      onTest.run(Source.single(())).futureValue shouldBe Done
 
       verify(mockRepo     , times(2)).pullOutstanding
       verify(mockRepo     , times(1)).completeAndDelete(workItem.id)
@@ -166,7 +165,7 @@ class WebhookStreamRunnerSpec
         "webhook-stream.enabled"                  -> "false"
       , "webhook-stream.source-tick.initialDelay" -> "1.second"
       , "webhook-stream.source-tick.interval"     -> "1.second"
-      , "queue.retryAfter"                        -> "1.second"
+      , "queue.retryInterval"                     -> "1.second"
       )
     val mockRepo     : GithubRequestsQueueRepository  = mock[GithubRequestsQueueRepository]
     val mockConnector: WebhookConnector               = mock[WebhookConnector]
