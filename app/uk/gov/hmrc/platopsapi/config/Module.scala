@@ -16,12 +16,10 @@
 
 package uk.gov.hmrc.platopsapi.config
 
+import uk.gov.hmrc.platopsapi.webhook.WebhookStreamRunner
 import com.google.inject.AbstractModule
 
-class Module extends AbstractModule {
-
-  override def configure(): Unit = {
-
-    bind(classOf[AppConfig]).asEagerSingleton()
-  }
-}
+class Module extends AbstractModule:
+  override def configure(): Unit =
+    bind(classOf[AppConfig          ]).asEagerSingleton()
+    bind(classOf[WebhookStreamRunner]).asEagerSingleton()
