@@ -40,6 +40,7 @@ class ApiController @Inject()(
   private val serviceDependenciesUrl  = servicesConfig.baseUrl("service-dependencies")
   private val releasesApiUrl          = servicesConfig.baseUrl("releases-api")
   private val slackNotificationsUrl   = servicesConfig.baseUrl("slack-notifications")
+  private val healthMetricsUrl        = servicesConfig.baseUrl("health-metrics")
 
   private def streamParser: BodyParser[Source[ByteString, _]] =
     BodyParser: _ =>
@@ -117,3 +118,8 @@ class ApiController @Inject()(
     Action.async:
       implicit request =>
         apiConnector.get(url"$slackNotificationsUrl/slack-notifications/v2/$msgId/status")
+
+  def calculateZapCoverage() =
+    Action.async(parse.json):
+      implicit request =>
+        apiConnector.post(url"$healthMetricsUrl/health-metrics/calculate-zap-coverage", request.body)
