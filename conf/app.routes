@@ -20,3 +20,6 @@ GET      /whats-running-where/:serviceName                         uk.gov.hmrc.p
 POST     /notification                                             uk.gov.hmrc.platopsapi.api.ApiController.sendLegacySlackNotification()
 POST     /v2/notification                                          uk.gov.hmrc.platopsapi.api.ApiController.sendSlackNotification()
 GET      /v2/:msgId/status                                         uk.gov.hmrc.platopsapi.api.ApiController.slackNotificationStatus(msgId: String)
+
+# Health Metrics
+POST    /health-metrics/calculate-zap-coverage                     uk.gov.hmrc.platopsapi.api.ApiController.calculateZapCoverage()
