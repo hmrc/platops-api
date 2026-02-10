@@ -18,7 +18,8 @@
             "fileName": "catalogue-frontend.yaml",
             "commitId": "5678"
           }
-        ]
+        ],
+        "isConsul":false
       },
       {
         "environment": "qa",
@@ -36,7 +37,8 @@
             "fileName": "catalogue-frontend.yaml",
             "commitId": "5678"
           }
-        ]
+        ],
+        "isConsul":false
       },
       {
         "environment": "staging",
@@ -54,7 +56,8 @@
             "fileName": "catalogue-frontend.yaml",
             "commitId": "5678"
           }
-        ]
+        ],
+        "isConsul":false
       },
       {
         "environment": "externaltest",
@@ -72,7 +75,8 @@
             "fileName": "catalogue-frontend.yaml",
             "commitId": "5678"
           }
-        ]
+        ],
+        "isConsul":false
       },
       {
         "environment": "production",
@@ -90,7 +94,8 @@
             "fileName": "catalogue-frontend.yaml",
             "commitId": "5678"
           }
-        ]
+        ],
+        "isConsul":false
       }
     ]
   },
@@ -113,7 +118,8 @@
             "fileName": "play-authorisation.yaml",
             "commitId": "5678"
           }
-        ]
+        ],
+        "isConsul":false
       },
       {
         "environment": "production",
@@ -131,7 +137,8 @@
             "fileName": "play-authorisation.yaml",
             "commitId": "5678"
           }
-        ]
+        ],
+        "isConsul":false
       }
     ]
   },
@@ -154,7 +161,8 @@
             "fileName": "service-dependencies.yaml",
             "commitId": "5678"
           }
-        ]
+        ],
+        "isConsul":false
       },
       {
         "environment": "production",
@@ -172,7 +180,8 @@
             "fileName": "service-dependencies.yaml",
             "commitId": "5678"
           }
-        ]
+        ],
+        "isConsul":false
       }
     ]
   },
@@ -195,7 +204,8 @@
             "fileName": "user-details.yaml",
             "commitId": "5678"
           }
-        ]
+        ],
+        "isConsul":false
       },
       {
         "environment": "production",
@@ -213,7 +223,8 @@
             "fileName": "user-details.yaml",
             "commitId": "5678"
           }
-        ]
+        ],
+        "isConsul":false
       }
     ]
   }
