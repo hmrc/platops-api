@@ -47,11 +47,6 @@ class LegacyController @Inject()(
     Action.async:
       Future(Redirect(routes.ApiController.whatsRunningWhereForService(serviceName), MOVED_PERMANENTLY))
 
-  def sendLegacySlackNotification() =
-    Action.async(parse.json):
-      implicit request =>
-        apiConnector.post(url"$slackNotificationsUrl/slack-notifications/notification", request.body)
-
   def sendSlackNotification() =
     Action.async(parse.json):
       implicit request =>

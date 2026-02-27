@@ -103,12 +103,6 @@ class ApiController @Inject()(
       implicit request =>
         apiConnector.get(url"$releasesApiUrl/releases-api/whats-running-where/$serviceName")
 
-  @deprecated("Use sendSlackNotification instead. Will be removed on 01/09/2025")
-  def sendLegacySlackNotification() =
-    Action.async(parse.json):
-      implicit request =>
-        apiConnector.post(url"$slackNotificationsUrl/slack-notifications/notification", request.body)
-
   def sendSlackNotification() =
     Action.async(parse.json):
       implicit request =>
