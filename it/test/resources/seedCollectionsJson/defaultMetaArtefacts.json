@@ -2,7 +2,7 @@
   {
     "name"               : "hmrc-mongo",
     "version"            : "0.57.0",
-    "uri"                : "https://artefacts.tax.service.gov.uk/artifactory/webstore-local/metadata/hmrc-mongo/hmrc-mongo-v0.57.0.meta.tgz",
+    "uri"                : "https://artefacts.tax.service.gov.uk/artifactory/metadata/metadata/hmrc-mongo/hmrc-mongo-v0.57.0.meta.tgz",
     "gitUrl"             : "https://github.com/hmrc/hmrc-mongo.git",
     "dependenciesBuild"  : [ { "group": "uk.gov.hmrc", "artifact": "sbt-git-versioning_2.11", "version": "0.9.0"} ],
     "buildInfo" : {
@@ -43,7 +43,7 @@
   {
     "name"               : "play-authorisation",
     "version"            : "0.57.0",
-    "uri"                : "https://artefacts.tax.service.gov.uk/artifactory/webstore-local/metadata/play-authorisation/play-authorisation-v0.57.0.meta.tgz",
+    "uri"                : "https://artefacts.tax.service.gov.uk/artifactory/metadata/metadata/play-authorisation/play-authorisation-v0.57.0.meta.tgz",
     "gitUrl"             : "https://github.com/hmrc/play-authorisation.git",
     "dependenciesBuild"  : [ { "group": "uk.gov.hmrc", "artifact": "sbt-git-versioning_2.11", "version": "0.9.0"} ],
     "buildInfo" : {
@@ -66,7 +66,7 @@
   {
     "name"               : "mobile-auth-stub",
     "version"            : "0.12.0",
-    "uri"                : "https://artefacts.tax.service.gov.uk/artifactory/webstore-local/metadata/mobile-auth-stub/mobile-auth-stub-v0.12.0.meta.tgz",
+    "uri"                : "https://artefacts.tax.service.gov.uk/artifactory/metadata/metadata/mobile-auth-stub/mobile-auth-stub-v0.12.0.meta.tgz",
     "gitUrl"             : "https://github.com/hmrc/mobile-auth-stub.git",
     "dependenciesBuild"  : [],
     "buildInfo" : {
@@ -90,7 +90,7 @@
   {
     "name"               : "personal-details-validation-frontend",
     "version"            : "0.30.0",
-    "uri"                : "https://artefacts.tax.service.gov.uk/artifactory/webstore-local/metadata/personal-details-validation-frontend/personal-details-validation-frontend-v0.30.0.meta.tgz",
+    "uri"                : "https://artefacts.tax.service.gov.uk/artifactory/metadata/metadata/personal-details-validation-frontend/personal-details-validation-frontend-v0.30.0.meta.tgz",
     "gitUrl"             : "https://github.com/hmrc/personal-details-validation-frontend.git",
     "dependenciesBuild"  : [],
     "buildInfo" : {
@@ -114,7 +114,7 @@
   {
     "name"               : "catalogue-frontend",
     "version"            : "4.254.0",
-    "uri"                : "https://artefacts.tax.service.gov.uk/artifactory/webstore-local/metadata/catalogue-frontend/catalogue-frontend-v4.254.0.meta.tgz",
+    "uri"                : "https://artefacts.tax.service.gov.uk/artifactory/metadata/metadata/catalogue-frontend/catalogue-frontend-v4.254.0.meta.tgz",
     "gitUrl"             : "https://github.com/hmrc/catalogue-frontend.git",
     "dependenciesBuild"  : [],
     "buildInfo" : {
@@ -139,7 +139,7 @@
   {
     "name"               : "catalogue-frontend",
     "version"            : "4.255.0",
-    "uri"                : "https://artefacts.tax.service.gov.uk/artifactory/webstore-local/metadata/catalogue-frontend/catalogue-frontend-v4.255.0.meta.tgz",
+    "uri"                : "https://artefacts.tax.service.gov.uk/artifactory/metadata/metadata/catalogue-frontend/catalogue-frontend-v4.255.0.meta.tgz",
     "gitUrl"             : "https://github.com/hmrc/catalogue-frontend.git",
     "dependenciesBuild"  : [ { "group": "com.typesafe.play", "artifact": "sbt-plugin_2.11"          , "version": "2.5.12"        },
                              { "group": "uk.gov.hmrc"      , "artifact": "sbt-distributables_2.11"  , "version": "1.1.0"         } ],
