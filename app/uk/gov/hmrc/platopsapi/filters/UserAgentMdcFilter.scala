@@ -29,6 +29,6 @@ class UserAgentMdcFilter @Inject()(
 ) extends Filter:
 
   override def apply(f: RequestHeader => Future[Result])(rh: RequestHeader): Future[Result] =
-    RequestMdc.add(rh.id, Map("userAgent" -> rh.headers.get("User-Agent").getOrElse("-")))
+    RequestMdc.add(rh.id, Map("http_user_agent" -> rh.headers.get("User-Agent").getOrElse("-")))
     f(rh)
 
