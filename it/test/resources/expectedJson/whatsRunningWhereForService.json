@@ -17,8 +17,7 @@
           "fileName": "catalogue-frontend.yaml",
           "commitId": "5678"
         }
-      ],
-      "isConsul":false
+      ]
     },
     {
       "environment": "qa",
@@ -36,8 +35,7 @@
           "fileName": "catalogue-frontend.yaml",
           "commitId": "5678"
         }
-      ],
-      "isConsul":false
+      ]
     },
     {
       "environment": "staging",
@@ -55,8 +53,7 @@
           "fileName": "catalogue-frontend.yaml",
           "commitId": "5678"
         }
-      ],
-      "isConsul":false
+      ]
     },
     {
       "environment": "externaltest",
@@ -74,8 +71,7 @@
           "fileName": "catalogue-frontend.yaml",
           "commitId": "5678"
         }
-      ],
-      "isConsul":false
+      ]
     },
     {
       "environment": "production",
@@ -93,8 +89,7 @@
           "fileName": "catalogue-frontend.yaml",
           "commitId": "5678"
         }
-      ],
-      "isConsul":false
+      ]
     }
   ]
 }
