@@ -16,6 +16,11 @@
 
 package uk.gov.hmrc.platopsapi
 
+import org.scalatest.BeforeAndAfterEach
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
+import uk.gov.hmrc.http.test.WireMockSupport
+import uk.gov.hmrc.platopsapi.stub.ApiStubs
 import org.scalatest.DoNotDiscover
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.should.Matchers
@@ -32,7 +37,26 @@ class ApiControllerISpec
     with Matchers
     with ScalaFutures
     with IntegrationPatience
-    with GuiceOneServerPerSuite {
+    with GuiceOneServerPerSuite
+    with WireMockSupport
+    with BeforeAndAfterEach:
+
+  override lazy val app: Application =
+    new GuiceApplicationBuilder()
+      .configure(
+        Seq("teams-and-repositories", "service-dependencies", "releases-api", "slack-notifications")
+          .flatMap: name =>
+            Seq(
+              s"microservice.services.$name.host" -> wireMockHost,
+              s"microservice.services.$name.port" -> wireMockPort
+            )
+          .toMap
+      )
+      .build()
+
+  override def beforeEach(): Unit =
+    super.beforeEach()
+    ApiStubs.stubAll()
 
   private val wsClient     = app.injector.instanceOf[WSClient]
   private val baseUrl      = s"http://localhost:$port"
@@ -413,4 +437,3 @@ class ApiControllerISpec
         |}
         |""".stripMargin
       )
-}
